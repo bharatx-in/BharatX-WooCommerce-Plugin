@@ -27,6 +27,7 @@
  * @subpackage Bharatx_Pay_In_3_Feature_Plugin/includes
  * @author     BharatX <Karan@bharatx.tech>
  */
+
 class Bharatx_Pay_In_3_Feature_Plugin {
 
 	/**
