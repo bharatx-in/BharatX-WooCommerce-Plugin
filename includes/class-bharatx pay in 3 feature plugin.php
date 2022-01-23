@@ -68,12 +68,12 @@ class Bharatx_Pay_In_3_Feature_Plugin {
 	 * @since    1.0.0
 	 */
 	public function __construct() {
-		if ( defined( 'BHARATX PAY IN 3 FEATURE PLUGIN_VERSION' ) ) {
-			$this->version = BHARATX PAY IN 3 FEATURE PLUGIN_VERSION;
+		if ( defined( 'BHARATX_PAY_IN_3_FEATURE_PLUGIN_VERSION' ) ) {
+			$this->version = BHARATX_PAY_IN_3_FEATURE_PLUGIN_VERSION;
 		} else {
 			$this->version = '1.0.0';
 		}
-		$this->plugin_name = 'bharatx pay in 3 feature plugin';
+		$this->plugin_name = 'Bharatx pay in 3 feature plugin';
 
 		$this->load_dependencies();
 		$this->set_locale();
@@ -214,6 +214,31 @@ class Bharatx_Pay_In_3_Feature_Plugin {
 	 */
 	public function get_version() {
 		return $this->version;
+	}
+
+	/**
+	 * Include plugin gateway class file
+	 *
+	 * @since    1.0.0
+	 */
+	public function init_gateway_class() {
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/class-bharatx-pay-in-3-feature-gateway.php';
+	}
+
+	/**
+	 * Plugin page settings.
+	 *
+	 * @since   1.0.0
+	 * @param       Array $links  Plugin Settings page link.
+	 * @return      Array $links       Plugin Settings page link.
+	 */
+	public function plugin_page_settings_link( $links ) {
+
+		$action_links = array(
+			'settings' => '<a href="' . admin_url( 'admin.php?page=wc-settings&tab=checkout&section=bharatx-pay-in-3-feature-plugin' ) . '" aria-label="' . esc_attr__( 'View settings', 'bharatx-pay-in-3-feature' ) . '">' . esc_html__( 'Settings', 'bharatx-pay-in-3-feature' ) . '</a>',
+		);
+
+		return array_merge( $action_links, $links );
 	}
 
 }

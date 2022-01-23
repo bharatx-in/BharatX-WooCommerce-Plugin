@@ -79,4 +79,22 @@ function run_bharatx pay in 3 feature plugin() {
 	$plugin->run();
 
 }
-run_bharatx pay in 3 feature plugin();
+
+/**
+* Check if WooCommerce is active
+*/
+if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', get_option( 'active_plugins' ) ) ) ) {
+	run_bharatx pay in 3 feature plugin();
+} else {
+	add_action( 'admin_notices', 'bharatx_pay_in_3_feature_installed_notice' );
+}
+
+/**
+ * Display Woocommerce Activation notice.
+ */
+function simpl_pay_in_3_for_woocommerce_installed_notice() {     ?>
+	<div class="error">
+	  <p><?php echo esc_html__( 'BharatX Pay-in-3 feature requires WooCommerce Plugin. Please install or activate WooCommerce', 'bharatx-pay-in-3-for-woocommerce' ); ?></p>
+	</div>
+	<?php
+}
