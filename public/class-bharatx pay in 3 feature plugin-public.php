@@ -92,10 +92,10 @@ class Bharatx_Pay_In_3_Feature_Plugin_Public {
 		$this->supported_countries = array( 'IN' );
 
 		$this->strings = array(
-			'price_string'               => 'Or 3 interest free payments of {{ amount }} with {{ logo }} {{ info_icon }}',
+			'price_string'               => '3 interest free payments of {{ amount }} with {{ logo }} {{ info_icon }}',
 			'payment_method_title'       => 'BharatX',
 			'payment_method_description' => 'Pay In 3',
-			'varying_product_payment_description' => 'Or 3 interest free payments starting with {{ amount }} on {{ logo }} {{ info_icon }}'
+			'varying_product_payment_description' => '3 interest free payments starting with {{ amount }} on {{ logo }} {{ info_icon }}'
 		);
 
 		add_action( 'init', array( $this, 'init' ) );
@@ -319,7 +319,7 @@ class Bharatx_Pay_In_3_Feature_Plugin_Public {
 
 		$info_icon       = '<img src="' . esc_html( plugin_dir_url( __FILE__ ) . 'images/info.svg' ) . '"/>';
 		if ( empty( $popup_image ) ) {
-			$popup_image = '';
+			$popup_image = 'https://bharatx.tech/wp-content/webp-express/webp-images/uploads/2021/10/p2.png.webp';
 		}
 
 		$featherlight = 'data-featherlight="' . $popup_image . '"';
@@ -362,7 +362,7 @@ class Bharatx_Pay_In_3_Feature_Plugin_Public {
 		if ( is_admin() ) {
 			return $title;
 		}
-		if ( bharatx_PAY_IN_3_FOR_WOOCOMMERCE_SLUG === $id ) {
+		if ( BHARATX_PAY_IN_3_FEATURE_SLUG === $id ) {
 
 			if( $this->settings['checkout_page_payment_method_title'] ) {
 				$title = $this->settings['checkout_page_payment_method_title'];
@@ -385,7 +385,7 @@ class Bharatx_Pay_In_3_Feature_Plugin_Public {
 		if ( is_admin() ) {
 			return $description;
 		}
-		if ( bharatx_PAY_IN_3_FEATURE_SLUG === $id ) {
+		if ( BHARATX_PAY_IN_3_FEATURE_SLUG === $id ) {
 			if( $this->settings['checkout_page_payment_method_description'] ) {
 				$description = $this->settings['checkout_page_payment_method_description'];
 			} else {
