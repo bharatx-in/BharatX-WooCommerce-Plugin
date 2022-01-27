@@ -189,7 +189,7 @@ class Bharatx_Pay_In_3_Feature_Plugin_Public {
 	 */
 	public function bharatx_price_text() {
 		global $product;
-		if ( 'bharatxe' === $product->get_type() ) {
+		if ( 'simple' === $product->get_type() ) {
 			$price = $product->get_price();
 			echo wp_kses_post( $this->get_bharatx_price_text( $price, 'product' ) );
 		}
@@ -296,7 +296,7 @@ class Bharatx_Pay_In_3_Feature_Plugin_Public {
 	 * @param float  $price Price.
 	 * @param string $page Page Name.
 	 */
-	public function get_bharatx_price_text( $price, $page, $type='bharatx' ) {
+	public function get_bharatx_price_text( $price, $page, $type='simple' ) {
 		$popup_image     = $this->settings['merchant_popup_image'];
 		$featherlight    = '';
 		$amount_in_paise = (int) ( round( $price, 2 ) * 100 );
@@ -333,7 +333,7 @@ class Bharatx_Pay_In_3_Feature_Plugin_Public {
 		}
 
 		ob_start();
-		if($type == 'bharatxe'){
+		if($type == 'simple'){
 			$string       = $this->strings['price_string'];
 		}else{
 			$string       = $this->strings['varying_product_payment_description'];

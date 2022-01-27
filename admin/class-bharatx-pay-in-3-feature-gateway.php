@@ -55,10 +55,7 @@ class Bharatx_Pay_In_3_Feature_Gateway extends WC_Payment_Gateway {
 		$this->enabled                = $this->get_option( 'enabled' );
 		$this->testmode               = 'yes' === $this->get_option( 'testmode' );
 		$this->merchant_partner_id     = $this->get_option( 'merchant_partner_id' );
-		$this->merchant_client_secret = $this->get_option( 'merchant_client_secret' );
-		$this->name     = $this->get_option( 'name' );
-		$this->phone_number     = $this->get_option( 'phone_number' );
-		$this->email     = $this->get_option( 'email' );
+		$this->merchant_private_key = $this->get_option( 'merchant_private_key' );
 
 		
 		
@@ -98,24 +95,9 @@ class Bharatx_Pay_In_3_Feature_Gateway extends WC_Payment_Gateway {
 				'title' => esc_html__( 'Merchant Partner ID', 'Bharatx_Pay_In_3_Feature_Plugin' ),
 				'type'  => 'text',
 			),
-			'merchant_client_secret' => array(
+			'merchant_private_key' => array(
 				'title' => esc_html__( 'Merchant Private Key', 'Bharatx_Pay_In_3_Feature_Plugin' ),
 				'type'  => 'password',
-			),
-
-			'name'     => array(
-				'title' => esc_html__( 'Name', 'Bharatx_Pay_In_3_Feature_Plugin' ),
-				'type'  => 'text',
-			),
-
-			'phone_number'     => array(
-				'title' => esc_html__( 'Phone Number', 'Bharatx_Pay_In_3_Feature_Plugin' ),
-				'type'  => 'text',
-			),
-
-			'email'     => array(
-				'title' => esc_html__( 'Email', 'Bharatx_Pay_In_3_Feature_Plugin' ),
-				'type'  => 'email',
 			),
 
 			'merchant_popup_image'   => array(
@@ -248,9 +230,10 @@ class Bharatx_Pay_In_3_Feature_Gateway extends WC_Payment_Gateway {
 
 		update_post_meta( $order->get_id(), '_bharatx_order_id', $uniq_order_id );
 
+
 		$body = array(
 			'merchant_partner_id'                 => $this->merchant_partner_id,
-			// 'transaction_status_redirection_url' => get_site_url() . '/?wc-api=Bharatx_Pay_In_3_Feature_Gateway&key=' . $order->get_order_key(),
+			'transaction_status_redirection_url' => get_site_url() . '/?wc-api=Bharatx_Pay_In_3_Feature_Gateway&key=' . $order->get_order_key(),
 			// 'transaction_status_webhook_url' => get_site_url() . '/?wc-api=Bharatx_Pay_In_3_Feature_Gateway_Webhook&key=' . $order->get_order_key(),
 			'order_id'                           => (string) $uniq_order_id,
 			'amount_in_paise'                    => (int) ( $order->calculate_totals() * 100 ),
@@ -266,10 +249,12 @@ class Bharatx_Pay_In_3_Feature_Gateway extends WC_Payment_Gateway {
 
 		$body['user_details'] = array(
 			'id'              => $transaction_id,
-			'amount' 	      => (int) ( $order->calculate_totals() * 100 ),
-			'name'     		  => $order->get_billing_first_name() . $order->get_billing_last_name(),
-			'phone_number'    => $order->get_billing_phone(),
-			'email'           => $order->get_billing_email(),
+			'amount' 	      => $body['amount_in_paise'],
+			'user'			  => array(
+				'name'     		  => $order->get_billing_first_name() . $order->get_billing_last_name(),
+				'phoneNumber'    => $order->get_billing_phone(),
+				'email'           => $order->get_billing_email(),
+			),
 		);
 
 		$body['billing_address'] = array(
@@ -319,29 +304,34 @@ class Bharatx_Pay_In_3_Feature_Gateway extends WC_Payment_Gateway {
 
 		$this->log( 'BharatX redirecting' );
 
-		$php_string = json_encode($body['user_details']);
-		$signature = hash_hmac('sha256',$php_string,$this->merchant_client_secret,true);
+		$php_string = json_encode($body['user_details'] );
+		$msg_hash = $php_string . '/api/transaction' . $this->merchant_private_key;
+		$shasignature = hash('sha256',$msg_hash,true);
+		$signature = base64_encode($shasignature);	
 
 		$args                 = array(
+			'method'      => "POST",
 			'headers'     => array(
 				'Content-Type'  => 'application/json',
 				'X-Partner-Id'  => $this->merchant_partner_id,
 				'X-Signature'	=> $signature,
-			)
+			),
+			'body' => $php_string
 		);
 		$initiate_url         = $this->get_initiate_url();
-		$response             = wp_remote_post( $initiate_url, $args['headers'] );
+		$response             = wp_remote_post( $initiate_url, $args);
 		$encode_response_body = wp_remote_retrieve_body( $response );
 		$response_code        = wp_remote_retrieve_response_code( $response );
-		$this->dump_api_actions( $initiate_url, $args['headers'], $encode_response_body, $response_code );
+		$this->dump_api_actions( $initiate_url, $args, $encode_response_body, $response_code );
 		if ( 200 === $response_code ) {
 			$response_body = json_decode( $encode_response_body );
-			update_post_meta( $order->get_id(), '_bharatx_redirect_url', $response_body->data->redirection_url );
+			update_post_meta( $order->get_id(), '_bharatx_redirect_url', $response_body->redirectUrl );
 			return array(
 				'result'   => 'success',
 				'redirect' => $order->get_checkout_payment_url( true ),
 			);
 		} else {
+			echo($response_code);
 			$order->add_order_note( esc_html__( 'Unable to generate the transaction ID. Payment couldn\'t proceed.', 'Bharatx_Pay_In_3_Feature_Plugin' ) );
 			wc_add_notice( esc_html__( 'Sorry, there was a problem with your payment.', 'Bharatx_Pay_In_3_Feature_Plugin' ), 'error' );
 			return array(
@@ -419,7 +409,6 @@ class Bharatx_Pay_In_3_Feature_Gateway extends WC_Payment_Gateway {
 	 */
 	public function receipt_page( $order_id ) {
 		echo '<p>' . esc_html__( 'Thank you for your order, please wait as you will be automatically redirected to BharatX.', 'Bharatx_Pay_In_3_Feature_Plugin' ) . '</p>';
-
 		$redirect_url = get_post_meta( $order_id, '_bharatx_redirect_url', true );
 		?>
 		<script>
@@ -434,6 +423,8 @@ class Bharatx_Pay_In_3_Feature_Gateway extends WC_Payment_Gateway {
 	 *
 	 * @since    1.0.0
 	 */
+
+	
 	public function payment_callback() {
 		$_GET = stripslashes_deep( wc_clean( $_GET ) );
 		$this->dump_api_actions( 'paymenturl', '', $_GET );
@@ -475,7 +466,7 @@ class Bharatx_Pay_In_3_Feature_Gateway extends WC_Payment_Gateway {
 				}
 
 				$data       = build_query( $data );
-				$_signature = hash_hmac( 'sha256', $data, $this->merchant_client_secret );
+				$_signature = hash_hmac( 'sha256', $data, $this->merchant_private_key );
 
 				if ( $signature === $_signature ) {
 					$url = $this->get_transaction_status_url( $_order_id );
@@ -489,7 +480,7 @@ class Bharatx_Pay_In_3_Feature_Gateway extends WC_Payment_Gateway {
 					$response             = wp_remote_get( $url, $args['headers'] );
 					$encode_response_body = wp_remote_retrieve_body( $response );
 					$response_code        = wp_remote_retrieve_response_code( $response );
-					$this->dump_api_actions( $$url, $args['headers'], $encode_response_body, $response_code );
+					$this->dump_api_actions( $url, $args['headers'], $encode_response_body, $response_code );
 					if ( 200 === $response_code ) {
 						$response_body  = json_decode( $encode_response_body );
 						$data           = $response_body->data;
@@ -549,6 +540,8 @@ class Bharatx_Pay_In_3_Feature_Gateway extends WC_Payment_Gateway {
 	 *
 	 * @since    1.0.0
 	 */
+	
+
 	public function webhook_callback() {
 		$_GET = stripslashes_deep( wc_clean( $_GET ) );
 		$this->dump_api_actions( 'webhook', '', $_GET );
@@ -591,7 +584,7 @@ class Bharatx_Pay_In_3_Feature_Gateway extends WC_Payment_Gateway {
 				}
 				
 				$data       = build_query( $data );
-				$_signature = hash_hmac( 'sha256', $data, $this->merchant_client_secret );
+				$_signature = hash_hmac( 'sha256', $data, $this->merchant_private_key );
 				
 				if ( $signature === $_signature ) {
 					$url = $this->get_transaction_status_url( $_order_id );
@@ -599,7 +592,7 @@ class Bharatx_Pay_In_3_Feature_Gateway extends WC_Payment_Gateway {
 					$args                 = array(
 						'headers'     => array(
 							'Content-Type'  => 'application/json',
-							'X-Partner-Id' => $this->merchant_client_secret,
+							'X-Partner-Id' => $this->merchant_private_key,
 						),
 						'timeout'     => 80,
 						'redirection' => 35,
@@ -699,7 +692,7 @@ class Bharatx_Pay_In_3_Feature_Gateway extends WC_Payment_Gateway {
 			$args                 = array(
 				'headers'     => array(
 					'Content-Type'  => 'application/json',
-					'X-Partner-Id' => $this->merchant_client_secret,
+					'X-Partner-Id' => $this->merchant_private_key,
 					'X-Signature' => $this->encodedSignature,
 				),
 				'body'        => json_encode( $body ),
