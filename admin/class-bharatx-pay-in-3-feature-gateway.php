@@ -2,7 +2,7 @@
 /**
  * The paymentgateway-specific functionality of the plugin.
  *
- * @since      1.0.0
+ * @since      1.2.0
  *
  * @package    Bharatx_Pay_In_3_Feature_Plugin
  * @subpackage Bharatx_Pay_In_3_Feature_Plugin/admin
@@ -23,114 +23,100 @@ class Bharatx_Pay_In_3_Feature_Gateway extends WC_Payment_Gateway {
 	/**
 	 * Initialize the class and set its properties.
 	 *
-	 * @since    1.0.0
+	 * @since    1.2.0
 	 */
+	
 	public function __construct() {
 
-		$this->id                 = Bharatx_Pay_In_3_Feature_Plugin_SLUG; // payment gateway plugin ID.
+		$this->id                 = BHARATX_PAY_IN_3_FEATURE_PLUGIN_SLUG; // payment gateway plugin ID.
 
 		// URL of the icon that will be displayed on checkout page near your gateway name.
+		
 		if ( $this->get_option('checkout_page_payment_method_logo_image') ) {
 			$this->icon               = $this->get_option('checkout_page_payment_method_logo_image');
 		} else {
-			$this->icon               = plugin_dir_url( Bharatx_Pay_In_3_Feature_Plugin_FILE ) . 'public/images/brand.svg';
+			$this->icon               = plugin_dir_url( BHARATX_PAY_IN_3_FEATURE_PLUGIN_FILE ) . 'public/images/logo.png';
 		}
 
 
 		$this->has_fields         = true; // in case you need a custom credit card form.
-		$this->method_title       = esc_html__( 'Bharatx', 'bharatx-pay-in-3-for-woocommerce' );
-		$this->method_description = esc_html__( 'Enables the user to pay in 3 interest free payments.', 'Bharatx_Pay_In_3_Feature_Plugin' );
+		$this->method_title       = esc_html__( 'Bharatx', 'bharatx-pay-in-3-feature-plugin' );
+		$this->method_description = esc_html__( 'Pay in 3 easy installments', 'bharatx-pay-in-3-feature-plugin' );
 		$this->log                = new WC_Logger();
 
 		$this->supports = array(
 			'products',
-			'refunds',
+	//	  	'refunds',
 		);
 
 		$this->init_form_fields();
-		$this->init_settings();
 
+		$this->init_settings();
 		$this->title                  = 'Bharatx';
 		$this->description            = 'Pay In 3';
 		$this->enabled                = $this->get_option( 'enabled' );
-		$this->testmode               = 'yes' === $this->get_option( 'testmode' );
-		$this->merchant_partner_id     = $this->get_option( 'merchant_partner_id' );
-		$this->merchant_client_secret = $this->get_option( 'merchant_client_secret' );
-
-		add_action( 'woocommerce_receipt_' . $this->id, array( $this, 'receipt_page' ) );
+		$this->merchant_partner_id    = $this->get_option( 'merchant_partner_id' );
+		$this->merchant_private_key   = $this->get_option( 'merchant_private_key' );
+		$this->color				  = $this->get_option( 'color' );
+		
 
 		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
 
+		add_action( 'woocommerce_receipt_' . $this->id, array( $this, 'receipt_page' ) );
+
 		add_action( 'woocommerce_api_' . strtolower( 'BharatX_Pay_In_3_Feature_Gateway' ), array( $this, 'payment_callback' ) );
 		
-		add_action( 'woocommerce_api_' . strtolower( 'BharatX_Pay_In_3_Feature_Gateway_Webhook' ), array( $this, 'webhook_callback' ) );
 	}
 
 	/**
-	 * Plugin options, we deal with it in Step 3 too
+	 * Plugin options
 	 *
-	 * @since    1.0.0
+	 * @since    1.2.0
 	 */
+
+
+	
+
 	public function init_form_fields() {
 		$this->form_fields = array(
 			'enabled'                => array(
-				'title'       => esc_html__( 'Enable/Disable', 'Bharatx_Pay_In_3_Feature_Plugin' ),
-				'label'       => esc_html__( 'Enable BharatX', 'Bharatx_Pay_In_3_Feature_Plugin' ),
+				'title'       => esc_html__( 'Enable/Disable', 'bharatx-pay-in-3-feature-plugin' ),
+				'label'       => esc_html__( 'Enable BharatX', 'bharatx-pay-in-3-feature-plugin' ),
 				'type'        => 'checkbox',
 				'description' => '',
-				'default'     => 'no',
-			),
-			'testmode'               => array(
-				'title'       => esc_html__( 'Test mode', 'Bharatx_Pay_In_3_Feature_Plugin' ),
-				'label'       => esc_html__( 'Enable Test Mode', 'Bharatx_Pay_In_3_Feature_Plugin' ),
-				'type'        => 'checkbox',
-				'description' => esc_html__( 'Place the payment gateway in test mode using test API keys.', 'Bharatx_Pay_In_3_Feature_Plugin' ),
 				'default'     => 'yes',
-				'desc_tip'    => true,
 			),
 			'merchant_partner_id'     => array(
-				'title' => esc_html__( 'Merchant Client ID', 'Bharatx_Pay_In_3_Feature_Plugin' ),
+				'title' => esc_html__( 'Merchant Partner ID', 'bharatx-pay-in-3-feature-plugin' ),
 				'type'  => 'text',
 			),
-			'merchant_client_secret' => array(
-				'title' => esc_html__( 'Merchant Client Secret', 'Bharatx_Pay_In_3_Feature_Plugin' ),
+			'merchant_private_key' => array(
+				'title' => esc_html__( 'Merchant Private Key', 'bharatx-pay-in-3-feature-plugin' ),
 				'type'  => 'password',
 			),
-
-			'merchant_popup_image'   => array(
-				'title' => esc_html__( 'Price Breakdown Popup Image Path', 'Bharatx_Pay_In_3_Feature_Plugin' ),
-				'placeholder' => __( 'Optional', 'Bharatx_Pay_In_3_Feature_Plugin' ),
-				'type'  => 'text',
-			),
-
-			'pay_in_3_note_bharatx_logo_image' => array(
-				'title' => esc_html__( 'Price Breakdown Description BharatX Logo Image Path', 'Bharatx_Pay_In_3_Feature_Plugin' ),
-				'placeholder' => __( 'Optional', 'Bharatx_Pay_In_3_Feature_Plugin' ),
-				'type'  => 'text',
-			),
-
 			'checkout_page_payment_method_title' => array(
-				'title' => esc_html__( 'Payment Method Title', 'Bharatx_Pay_In_3_Feature_Plugin' ),
-				'placeholder' => __( 'Optional', 'Bharatx_Pay_In_3_Feature_Plugin' ),
+				'title' => esc_html__( 'Payment Method Title', 'bharatx-pay-in-3-feature-plugin' ),
+				'placeholder' => __( 'Optional', 'bharatx-pay-in-3-feature-plugin' ),
 				'type'  => 'text',
 			),
-
-			'checkout_page_payment_method_description' => array(
-				'title' => esc_html__( 'Payment Method Description', 'Bharatx_Pay_In_3_Feature_Plugin' ),
-				'placeholder' => __( 'Optional', 'Bharatx_Pay_In_3_Feature_Plugin' ),
-				'type'  => 'text',
-			),
-
 			'checkout_page_payment_method_logo_image' => array(
-				'title' => esc_html__( 'Payment Method Logo Image Path', 'Bharatx_Pay_In_3_Feature_Plugin' ),
-				'placeholder' => __( 'Optional', 'Bharatx_Pay_In_3_Feature_Plugin' ),
+				'title' => esc_html__( 'Brand Logo Url ', 'bharatx-pay-in-3-feature-plugin' ),
+				'placeholder' => __( 'Optional', 'bharatx-pay-in-3-feature-plugin' ),
+				'description' => esc_html__( 'Paste your brand logo url here to feature it on the payment gateway ', 'bharatx-pay-in-3-feature-plugin' ),
+				'desc_tip'    => true,
 				'type'  => 'text',
 			),
-
+			'color' => array(
+				'title' => esc_html__( 'Primary Color', 'bharatx-pay-in-3-feature-plugin' ),
+				'placeholder' => __( 'Optional', 'bharatx-pay-in-3-feature-plugin' ),
+				'description' => esc_html__( 'Enter the hex color you want to use in the format FFFFFF ', 'bharatx-pay-in-3-feature-plugin' ),
+				'desc_tip'    => true,
+				'type'  => 'text',
+			),
 			'logging'                => array(
-				'title'   => __( 'Enable Logging', 'Bharatx_Pay_In_3_Feature_Plugin' ),
+				'title'   => __( 'Enable Logging', 'bharatx-pay-in-3-feature-plugin' ),
 				'type'    => 'checkbox',
-				'label'   => __( 'Enable Logging', 'Bharatx_Pay_In_3_Feature_Plugin' ),
+				'label'   => __( 'Enable Logging', 'bharatx-pay-in-3-feature-plugin' ),
 				'default' => 'yes',
 			),
 		);
@@ -139,7 +125,7 @@ class Bharatx_Pay_In_3_Feature_Gateway extends WC_Payment_Gateway {
 	/**
 	 * Process Payment.
 	 *
-	 * @since    1.0.0
+	 * @since    1.2.0
 	 * @param      int $order_id       The Order ID.
 	 * @return  string $url Redirect URL.
 	 */
@@ -152,148 +138,91 @@ class Bharatx_Pay_In_3_Feature_Gateway extends WC_Payment_Gateway {
 			}
 			return $this->get_redirect_url( $order );
 		} catch(Exception $e) {
-			$this->notify_airbrake( $e, $order_id );
+			print "something went wrong, caught yah! n";
 		}
 	}
 
 	/**
-	 * Returns Initite URL.
+	 * Returns Initiate URL.
 	 *
-	 * @since    1.0.0
+	 * @since    1.2.0
 	 * @return  string $url Initiate URL.
 	 */
 	public function get_initiate_url() {
-		if ( $this->testmode ) {
-			return '';   // sandbox url.
-		} else {
-			return '';  // live url.
-		}
+			return 'https://web.bharatx.tech/api/transaction';
 	}
 
-	/**
-	 * Notifies error to airbrake.
-	 *
-	 * @since    1.0.0
-	 * @param Object $exception Exception to be notified.
-	 * @param string $order_id Order ID.
-	 */
-	public function notify_airbrake( $exception, $order_id ) {
-		$error_class = get_class($exception);
-		$message = $exception->getMessage();
-		$file = $exception->getFile();
-		$line = $exception->getLine();
-		$trace = $exception->getTrace();
-
-		$url = 'https://api.airbrake.io/api/v3/projects/331901/notices?key=7369135ff3bb9c93250b4f90f47b3050';
-
-		$body = array();
-
-		$body['context'] = array(
-			'environment' => $this->testmode ? 'sandbox' : 'production',
-			'context' 		=> 'error'
-		);
-
-		$body['params'] = array(
-			'merchant_partner_id' => $this->merchant_partner_id,
-			'order_id' => $order_id
-		);
-
-		$body['errors'] = array();
-
-		$code = array();
-		foreach ( $trace as $index=>$trace_line ) {
-			$code[$index] = json_encode($trace_line);
-		}
-
-		$backtrace_data = array(
-			'file' => $file,
-			'line' => $line,
-			'code' => (object)$code
-		);
-
-		$error_data = array(
-			'type'=> $error_class,
-      'message'=> $message,
-			'backtrace' => array()
-		);
-		array_push( $error_data['backtrace'], $backtrace_data );
-		array_push( $body['errors'], $error_data );
-
-		$args                 = array(
-			'headers'     => array(
-				'Content-Type'  => 'application/json',
-			),
-			'body'        => json_encode( $body ),
-			'timeout'     => 80,
-			'redirection' => 35,
-		);
-		$response             = wp_remote_post( $url, $args );
-		$encode_response_body = wp_remote_retrieve_body( $response );
-		$response_code        = wp_remote_retrieve_response_code( $response );
-
-		if ( 200 === $response_code ) {
-			$this->log( 'Notified error to airbrake: ' . $message );
-		} else {
-			$this->log( 'Airbrake notification failed with response code: ' . $response_code);
-		}
-	}
 
 	/**
 	 * Returns Transaction status URL.
 	 *
-	 * @since    1.0.0
+	 * @since    1.2.0
 	 * @param int $order_id The Order Id.
-	 * @return  string $url Transation status URL.
+	 * @return  string $url Transaction status URL.
 	 */
-	public function get_transaction_status_url( $order_id ) {
-		if ( $this->testmode ) {
-			$url = '';
-		} else {
-			$url = '';
-		}
-
-		$url = str_replace( '{order_id}', $order_id, $url );
+	public function get_transaction_status_url( $transaction_id ) {
+		$url = 'https://web.bharatx.tech/api/transaction/status?id={transaction_id}';
+		$url = str_replace( '{transaction_id}', $transaction_id, $url );
 		return $url;
 	}
 
 	/**
 	 * Returns refund URL.
 	 *
-	 * @since    1.0.0
+	 * @since    1.2.0
 	 * @return  string $url refund URL.
 	 */
-	public function get_refund_url() {
+
+	/*
+	 public function get_refund_url() {
 		if ( $this->testmode ) {
 			return '';
 		} else {
 			return '';
 		}
 	}
+	*/
 
 	/**
 	 * Returns Redirect URL.
 	 *
-	 * @since    1.0.0
+	 * @since    1.2.0
 	 * @param Object $order Order.
 	 * @return  array $url redirect URL.
 	 */
 	public function get_redirect_url( $order ) {
 		$uniq_order_id = $this->get_unique_order_id($order->get_id());
-		update_post_meta( $order->get_id(), '_bharatx_order_id', $uniq_order_id );
-		$body = array(
+		$transaction_id = wp_generate_uuid4();
+
+				$body = array(
 			'merchant_partner_id'                 => $this->merchant_partner_id,
-			'transaction_status_redirection_url' => get_site_url() . '' . $order->get_order_key(),
-			'transaction_status_webhook_url' => get_site_url() . '' . $order->get_order_key(),
-			'order_id'                           => (string) $uniq_order_id,
-			'amount_in_paise'                    => (int) ( $order->calculate_totals() * 100 ),
-			'journey_id'                         => WC()->session->get( 'bharatx_journey_id' ),
+			'transaction_status_redirection_url'  => get_site_url() . '/?wc-api=Bharatx_Pay_In_3_Feature_Gateway&key=' . $order->get_order_key(),
+		    'transaction_status_webhook_url'      => get_site_url() . '/?wc-api=Bharatx_Pay_In_3_Feature_Gateway_Webhook&key=' . $order->get_order_key(),
+			'order_id'                            => (string) $uniq_order_id,
+			'amount_in_paise'                     => (int) ( $order->calculate_totals() * 100 ),
+			'journey_id'                          => WC()->session->get( 'bharatx_journey_id' ),
 		);
 
 		$body['user'] = array(
-			'phone_number' => $order->get_billing_phone(),
-			'email'        => $order->get_billing_email(),
 			'first_name'   => $order->get_billing_first_name(),
 			'last_name'    => $order->get_billing_last_name(),
+			'phone_number' => $order->get_billing_phone(),
+			'email'        => $order->get_billing_email(),
+		);
+
+		$body['user_details'] = array(
+			'id'              => $transaction_id,
+			'amount' 	      => $body['amount_in_paise'],
+			'user'			  => array(
+				'name'     		 => $order->get_billing_first_name() . $order->get_billing_last_name(),
+				'phoneNumber'    => $phone,
+				'email'           => $order->get_billing_email(),
+			),
+			'redirect'		  =>array(
+				'url'			 => $body['transaction_status_redirection_url'],
+				'logoOverride'	 => $this->icon,
+				'colorOverride'  => '#' . $this->color,
+			)
 		);
 
 		$body['billing_address'] = array(
@@ -340,37 +269,40 @@ class Bharatx_Pay_In_3_Feature_Gateway extends WC_Payment_Gateway {
 			}
 		}
 
-		if ( $this->testmode ) {
-			$body['mock_eligibility_response']        = 'eligibility_success';
-			$body['mock_eligibility_amount_in_paise'] = 500000;
-		}
 
 		$this->log( 'BharatX redirecting' );
 
+		$php_string = json_encode($body['user_details'] );
+		$msg_hash = $php_string . '/api/transaction' . $this->merchant_private_key;
+		$shasignature = hash('sha256',$msg_hash,true);
+		$signature = base64_encode($shasignature);
+
 		$args                 = array(
+			'method'      => "POST",
 			'headers'     => array(
-				'Authorization' => $this->merchant_client_secret,
 				'Content-Type'  => 'application/json',
+				'X-Partner-Id'  => $this->merchant_partner_id,
+				'X-Signature'	=> $signature,
 			),
-			'body'        => json_encode( $body ),
-			'timeout'     => 80,
-			'redirection' => 35,
+			'body' => $php_string
 		);
 		$initiate_url         = $this->get_initiate_url();
-		$response             = wp_remote_post( $initiate_url, $args );
+		$response             = wp_remote_post( $initiate_url, $args);
 		$encode_response_body = wp_remote_retrieve_body( $response );
 		$response_code        = wp_remote_retrieve_response_code( $response );
 		$this->dump_api_actions( $initiate_url, $args, $encode_response_body, $response_code );
-		if ( 200 === $response_code ) {
-			$response_body = json_decode( $encode_response_body );
-			update_post_meta( $order->get_id(), '_bharatx_redirect_url', $response_body->data->redirection_url );
+		if ( 200 == $response_code ) {
+			echo($response_code . $encode_response_body);
+			$response_body = json_decode($encode_response_body);
+			update_post_meta( $order->get_id(), '_bharatx_redirect_url', $response_body->redirectUrl );
 			return array(
 				'result'   => 'success',
-				'redirect' => $order->get_checkout_payment_url( true ),
+				'redirect' =>$order->get_checkout_payment_url( true ),
 			);
-		} else {
-			$order->add_order_note( esc_html__( 'Unable to generate the transaction ID. Payment couldn\'t proceed.', 'Bharatx_Pay_In_3_Feature_Plugin' ) );
-			wc_add_notice( esc_html__( 'Sorry, there was a problem with your payment.', 'Bharatx_Pay_In_3_Feature_Plugin' ), 'error' );
+		} else{
+			echo($response_code . $encode_response_body);
+			$order->add_order_note( esc_html__( 'Unable to generate the transaction ID. Payment couldn\'t proceed.', 'bharatx-pay-in-3-feature-plugin' ) );
+			wc_add_notice( esc_html__( 'Sorry, there was a problem with your payment.', 'bharatx-pay-in-3-feature-plugin' ), 'error' );
 			return array(
 				'result'   => 'failure',
 				'redirect' => $order->get_checkout_payment_url( true ),
@@ -382,7 +314,7 @@ class Bharatx_Pay_In_3_Feature_Gateway extends WC_Payment_Gateway {
 	/**
 	 * Generates unique BharatX order id.
 	 *
-	 * @since    1.0.0
+	 * @since    1.2.0
 	 * @param string $order_id Order ID.
 	 * @return  string $uniq_order_id Unique Order ID.
 	 */
@@ -394,7 +326,7 @@ class Bharatx_Pay_In_3_Feature_Gateway extends WC_Payment_Gateway {
 	/**
 	 * Log Messages.
 	 *
-	 * @since    1.0.0
+	 * @since    1.2.0
 	 * @param string $message Log Message.
 	 */
 	public function log( $message ) {
@@ -410,16 +342,13 @@ class Bharatx_Pay_In_3_Feature_Gateway extends WC_Payment_Gateway {
 	/**
 	 * Dump API Actions.
 	 *
-	 * @since    1.0.0
+	 * @since    1.2.0
 	 * @param string $url URL.
 	 * @param Array  $request Request.
 	 * @param Array  $response Response.
 	 * @param Int    $status_code Status Code.
 	 */
 	public function dump_api_actions( $url, $request = null, $response = null, $status_code = null ) {
-		if ( $this->get_option( 'testmode' ) === 'no' ) {
-			return;
-		}
 		ob_start();
 		echo esc_url( $url );
 		echo '<br>';
@@ -441,12 +370,11 @@ class Bharatx_Pay_In_3_Feature_Gateway extends WC_Payment_Gateway {
 	/**
 	 * Receipt Page.
 	 *
-	 * @since    1.0.0
+	 * @since    1.2.0
 	 * @param  int $order_id Order Id.
 	 */
 	public function receipt_page( $order_id ) {
-		echo '<p>' . esc_html__( 'Thank you for your order, please wait as you will be automatically redirected to BharatX.', 'Bharatx_Pay_In_3_Feature_Plugin' ) . '</p>';
-
+		echo '<p>' . esc_html__( 'Thank you for your order, please wait as your transaction is initiated on the BharatX', 'bharatx-pay-in-3-feature-plugin' ) . '</p>';
 		$redirect_url = get_post_meta( $order_id, '_bharatx_redirect_url', true );
 		?>
 		<script>
@@ -456,14 +384,12 @@ class Bharatx_Pay_In_3_Feature_Gateway extends WC_Payment_Gateway {
 		<?php
 	}
 
-	/**
-	 * Payment Callback check.
-	 *
-	 * @since    1.0.0
-	 */
-	public function payment_callback() {
-		$_GET = stripslashes_deep( wc_clean( $_GET ) );
-		$this->dump_api_actions( 'paymenturl', '', $_GET );
+
+	 public function payment_callback() {
+		
+		//$_GET = stripslashes_deep( wc_clean( $_GET ) );
+		
+		// $this->dump_api_actions( 'paymenturl', '', $_GET );
 
 		$order_key = ( isset( $_GET['key'] ) ) ? sanitize_text_field( wp_unslash( $_GET['key'] ) ) : '';
 
@@ -476,14 +402,12 @@ class Bharatx_Pay_In_3_Feature_Gateway extends WC_Payment_Gateway {
 				$order = new WC_Order( $order_id );
 			}
 
-			if ( isset( $_GET['status'] ) && 'SUCCESS' === sanitize_text_field( wp_unslash( $_GET['status'] ) ) ) {
 
-				$_order_id           = ( isset( $_GET['order_id'] ) ) ? sanitize_text_field( wp_unslash( $_GET['order_id'] ) ) : '';
-				$status              = ( isset( $_GET['status'] ) ) ? sanitize_text_field( wp_unslash( $_GET['status'] ) ) : '';
-				$signature           = ( isset( $_GET['signature'] ) ) ? sanitize_text_field( wp_unslash( $_GET['signature'] ) ) : '';
-				$signature_algorithm = ( isset( $_GET['signature_algorithm'] ) ) ? sanitize_text_field( wp_unslash( $_GET['signature_algorithm'] ) ) : '';
+			if ( isset( $_GET['txnStatus'] ) && 'SUCCESS' === sanitize_text_field( wp_unslash( $_GET['txnStatus'] ) ) ) {
+
+				$status              = ( isset( $_GET['txnStatus'] ) ) ? sanitize_text_field( wp_unslash( $_GET['txnStatus'] ) ) : '';
 				$nonce               = ( isset( $_GET['nonce'] ) ) ? sanitize_text_field( wp_unslash( $_GET['nonce'] ) ) : '';
-				$transaction_id      = ( isset( $_GET['transaction_id'] ) ) ? sanitize_text_field( wp_unslash( $_GET['transaction_id'] ) ) : '';
+				$transaction_id      = ( isset( $_GET['txnId'] ) ) ? sanitize_text_field( wp_unslash( $_GET['txnId'] ) ) : '';
 
 				$data = array();
 				if ( ! empty( $nonce ) ) {
@@ -502,38 +426,36 @@ class Bharatx_Pay_In_3_Feature_Gateway extends WC_Payment_Gateway {
 				}
 
 				$data       = build_query( $data );
-				$_signature = hash_hmac( 'sha1', $data, $this->merchant_client_secret );
+				$_signature = hash_hmac( 'sha256', $data, $this->merchant_private_key );
 
-				if ( $signature === $_signature ) {
-					$url = $this->get_transaction_status_url( $_order_id );
+				if ( true ) {
+					$url = $this->get_transaction_status_url( $transaction_id );
 					$this->log( 'BharatX Transaction Status Check' );
 					$args                 = array(
 						'headers'     => array(
-							'Authorization' => $this->merchant_client_secret,
 							'Content-Type'  => 'application/json',
+							'X-Partner-Id' => $this->merchant_partner_id,
 						),
-						'timeout'     => 80,
-						'redirection' => 35,
 					);
-					$response             = wp_remote_get( $url, $args );
+					$response             = wp_remote_get( $url, $args);
 					$encode_response_body = wp_remote_retrieve_body( $response );
 					$response_code        = wp_remote_retrieve_response_code( $response );
-					$this->dump_api_actions( $$url, $args, $encode_response_body, $response_code );
+					$this->dump_api_actions( $url, $args, $encode_response_body, $response_code );
 					if ( 200 === $response_code ) {
 						$response_body  = json_decode( $encode_response_body );
-						$data           = $response_body->data;
+						$status         = $response_body->status;
 						$transaction_id = $order->get_transaction_id();
-						if ( empty( $transaction_id ) && ! empty( $data->id ) ) {
-							$order->set_transaction_id( $data->id );
-						}
-						if ( true === $response_body->success ) {
-							if ( 'SUCCESS' === $data->status ) {
-								$order->add_order_note( esc_html__( 'Payment approved by BharatX successfully.', 'Bharatx_Pay_In_3_Feature_Plugin' ) );
-								$order->payment_complete( $data->id );
+						if ( 'SUCCESS' === $response_body->status) {
+							$signature_fields = $transaction_id . $response_body->status . $this->merchant_private_key ;
+							$hash_sign = hash('sha256', $signature_fields, true);
+							$new_signature = base64_encode($hash_sign);
+							if($response_body->signature === $new_signature) {
+								$order->add_order_note( esc_html__( 'Payment approved by BharatX was successful.', 'Bharatx_Pay_In_3_Feature_Plugin' ) );
+								$order->payment_complete( $transaction_id);
 								WC()->cart->empty_cart();
 								$redirect_url = $this->get_return_url( $order );
 							} else {
-								$message = esc_html__( 'Your payment via BharatX was unsuccessful. Please try again.', 'Bharatx_Pay_In_3_Feature_Plugin' );
+								$message = esc_html__( 'Your payment via BharatX was unsuccessful due to authorization error. Please try again.', 'Bharatx_Pay_In_3_Feature_Plugin' );
 								$order->update_status( 'failed', $message );
 								$this->add_order_notice( $message );
 								$redirect_url = wc_get_checkout_url();
@@ -548,7 +470,8 @@ class Bharatx_Pay_In_3_Feature_Gateway extends WC_Payment_Gateway {
 							$redirect_url = wc_get_checkout_url();
 						}
 					} else {
-						$message = esc_html__( 'Your payment via BharatX was unsuccessful. Please try again.', 'Bharatx_Pay_In_3_Feature_Plugin' );
+						$response_body  =  $encode_response_body ;
+						$message = esc_html__( 'Your payment via BharatX was unsuccessful. Please try again.' . $response_body . $response_code , 'Bharatx_Pay_In_3_Feature_Plugin' );
 						$order->update_status( 'failed', $message );
 						$this->add_order_notice( $message );
 						$redirect_url = wc_get_checkout_url();
@@ -561,217 +484,26 @@ class Bharatx_Pay_In_3_Feature_Gateway extends WC_Payment_Gateway {
 				}
 			} else {
 				$error   = isset( $_GET['error_code'] ) ? sanitize_text_field( wp_unslash( $_GET['error_code'] ) ) : '';
-				$message = esc_html__( 'Your payment via BharatX was unsuccessful. Please try again.', 'Bharatx_Pay_In_3_Feature_Plugin' );
+				$message = esc_html__( 'Your payment via BharatX was Cancelled. Please try again.' , 'Bharatx_Pay_In_3_Feature_Plugin' );
 				$order->update_status( 'failed', $message );
 				$this->add_order_notice( $message );
 				$redirect_url = wc_get_checkout_url();
 			}
 			wp_redirect( $redirect_url );
-			die();
+			exit();
 		} catch(Exception $e) {
-			$this->notify_airbrake( $e, $order_id );
-		}
-	}
-	
-	/**
-	 * Webhook Callback check.
-	 *
-	 * @since    1.0.0
-	 */
-	public function webhook_callback() {
-		$_GET = stripslashes_deep( wc_clean( $_GET ) );
-		$this->dump_api_actions( 'webhook', '', $_GET );
-		
-		$order_key = ( isset( $_GET['key'] ) ) ? sanitize_text_field( wp_unslash( $_GET['key'] ) ) : '';
-
-		$order_id = wc_get_order_id_by_order_key( $order_key );
-		
-		try {
-			if ( function_exists( 'wc_get_order' ) ) {
-				$order = wc_get_order( $order_id );
-			} else {
-				$order = new WC_Order( $order_id );
-			}
-			
-			if( 'pending' != $order->get_status() ) return;
-			
-			if ( isset( $_GET['status'] ) && 'SUCCESS' === sanitize_text_field( wp_unslash( $_GET['status'] ) ) ) {
-				$_order_id           = ( isset( $_GET['order_id'] ) ) ? sanitize_text_field( wp_unslash( $_GET['order_id'] ) ) : '';
-				$status              = ( isset( $_GET['status'] ) ) ? sanitize_text_field( wp_unslash( $_GET['status'] ) ) : '';
-				$signature           = ( isset( $_GET['signature'] ) ) ? sanitize_text_field( wp_unslash( $_GET['signature'] ) ) : '';
-				$signature_algorithm = ( isset( $_GET['signature_algorithm'] ) ) ? sanitize_text_field( wp_unslash( $_GET['signature_algorithm'] ) ) : '';
-				$nonce               = ( isset( $_GET['nonce'] ) ) ? sanitize_text_field( wp_unslash( $_GET['nonce'] ) ) : '';
-				$transaction_id      = ( isset( $_GET['transaction_id'] ) ) ? sanitize_text_field( wp_unslash( $_GET['transaction_id'] ) ) : '';
-				
-				$data = array();
-				if ( ! empty( $nonce ) ) {
-					$data['nonce'] = $nonce;
-				}
-				if ( ! empty( $_order_id ) ) {
-					$data['order_id'] = $_order_id;
-				}
-				if ( ! empty( $status ) ) {
-					$data['status'] = $status;
-				}
-				if ( ! empty( $transaction_id ) ) {
-					$data['transaction_id'] = $transaction_id;
-					$order->set_transaction_id( $transaction_id );
-					$order->save();
-				}
-				
-				$data       = build_query( $data );
-				$_signature = hash_hmac( 'sha1', $data, $this->merchant_client_secret );
-				
-				if ( $signature === $_signature ) {
-					$url = $this->get_transaction_status_url( $_order_id );
-					$this->log( 'BharatX Transaction Status Check' );
-					$args                 = array(
-						'headers'     => array(
-							'Authorization' => $this->merchant_client_secret,
-							'Content-Type'  => 'application/json',
-						),
-						'timeout'     => 80,
-						'redirection' => 35,
-					);
-					$response             = wp_remote_get( $url, $args );
-					$encode_response_body = wp_remote_retrieve_body( $response );
-					$response_code        = wp_remote_retrieve_response_code( $response );
-					$this->dump_api_actions( $$url, $args, $encode_response_body, $response_code );
-					if ( 200 === $response_code ) {
-						$response_body  = json_decode( $encode_response_body );
-						$data           = $response_body->data;
-						$transaction_id = $order->get_transaction_id();
-						if ( empty( $transaction_id ) && ! empty( $data->id ) ) {
-							$order->set_transaction_id( $data->id );
-						}
-						if ( true === $response_body->success ) {
-							if ( 'SUCCESS' === $data->status ) {
-								$order->add_order_note( esc_html__( 'Payment approved by BharatX successfully.', 'Bharatx_Pay_In_3_Feature_Plugin' ) );
-								$order->payment_complete( $data->id );
-							} else {
-								$message = esc_html__( 'Your payment via BharatX was unsuccessful. Please try again.', 'Bharatx_Pay_In_3_Feature_Plugin' );
-								$order->update_status( 'failed', $message );
-								$this->add_order_notice( $message );
-							}
-						} else {
-							$data          = $response_body->error;
-							$error_code    = $data->code;
-							$error_message = $data->message;
-							$message       = esc_html__( 'Your payment via BharatX was unsuccessful. Please try again.', 'pcss-woo-order-notifications' );
-							$order->update_status( 'failed', $message );
-							$this->add_order_notice( $message );
-						}
-					} else {
-						$message = esc_html__( 'Your payment via BharatX was unsuccessful. Please try again.', 'Bharatx_Pay_In_3_Feature_Plugin' );
-						$order->update_status( 'failed', $message );
-						$this->add_order_notice( $message );
-					}
-				} else {
-					$message = esc_html__( 'Your payment via BharatX was unsuccessful. Please try again.', 'Bharatx_Pay_In_3_Feature_Plugin' );
-					$order->update_status( 'failed', $message );
-					$this->add_order_notice( $message );
-				}	
-			}else {
-				$error   = isset( $_GET['error_code'] ) ? sanitize_text_field( wp_unslash( $_GET['error_code'] ) ) : '';
-				$message = esc_html__( 'Your payment via BharatX was unsuccessful. Please try again.', 'Bharatx_Pay_In_3_Feature_Plugin' );
-				$order->update_status( 'failed', $message );
-				$this->add_order_notice( $message );
-			}
-			
-		}catch(Exception $e) {
-			$this->notify_airbrake( $e, $order_id );
+			print "something went wrong, caught yah! ";
 		}
 	}
 
 	/**
 	 * Add notice to order.
 	 *
-	 * @since    1.0.0
+	 * @since    1.2.0
 	 * @param  string $message Message.
 	 */
 	public function add_order_notice( $message ) {
 		wc_add_notice( $message, 'error' );
 	}
 
-	/**
-	 * Process Refund.
-	 *
-	 * @since    1.0.0
-	 * @param Int    $order_id Order Id.
-	 * @param float  $amount Amount.
-	 * @param String $reason Refund Reason.
-	 * @return  bool true|false Return Refund Status.
-	*/
-	/*
-	public function process_refund( $order_id, $amount = null, $reason = '' ) {
-		try {
-			if ( function_exists( 'wc_get_order' ) ) {
-				$order = wc_get_order( $order_id );
-			} else {
-				$order = new WC_Order( $order_id );
-			}
-			$transaction_id = $order->get_transaction_id();
-			$url            = $this->get_refund_url();
-
-			$uniq_order_id = $this->get_unique_order_id($order->get_id());
-			update_post_meta( $order->get_id(), '_bharatx_order_refund_id', $uniq_order_id );
-
-			$body                 = array(
-				'merchant_partner_id' => $this->merchant_partner_id,
-				'amount_in_paise'    => (int) ( round( $amount, 2 ) * 100 ),
-				'transaction_id'     => $transaction_id,
-				'reason'             => $reason,
-				'order_id'           => (string) $uniq_order_id,
-			);
-			$args                 = array(
-				'headers'     => array(
-					'Authorization' => $this->merchant_client_secret,
-					'Content-Type'  => 'application/json',
-				),
-				'body'        => json_encode( $body ),
-				'timeout'     => 80,
-				'redirection' => 35,
-			);
-			$response             = wp_remote_post( $url, $args );
-			$encode_response_body = wp_remote_retrieve_body( $response );
-			$response_code        = wp_remote_retrieve_response_code( $response );
-			$this->dump_api_actions( $url, $args, $encode_response_body, $response_code );
-			$status  = '';
-			$code    = '';
-			$message = '';
-			if ( 200 === $response_code ) {
-				$response_body = json_decode( $encode_response_body );
-				if ( true === $response_body->success ) {
-					$data   = $response_body->data;
-					$status = true;
-					*/
-					/* translators: %1$s Amount, %2$s Refund ID */
-					/*
-					$message = sprintf( __( 'Refund of %1$s successfully sent to BharatX. Refund Transaction Id : %2$s', 'Bharatx_Pay_In_3_Feature_Plugin' ), $amount, $data->refunded_transaction_id );
-				} else {
-					$status = false;
-					*/
-					/* translators: %1$s Error Code, %2$s Error Message */
-					/*
-					$message = sprintf( __( 'There was an error submitting the refund to BharatX. Error Code %1$s, Error Message : %2$s', 'Bharatx_Pay_In_3_Feature_Plugin' ), $response_body->error->code, $response_body->error->message );
-				}
-			} else {
-				$status  = false;
-				$message = sprintf( __( 'There was an error submitting the refund to BharatX.', 'Bharatx_Pay_In_3_Feature_Plugin' ) );
-			}
-
-			if ( true === $status ) {
-				$order->add_order_note( $message );
-				return true;
-			} else {
-				$order->add_order_note( $message );
-				return false;
-			}
-		} catch(Exception $e) {
-			$this->notify_airbrake( $e, $order_id );
-			return false;
-		}
-	}
-
-	*/
 }
