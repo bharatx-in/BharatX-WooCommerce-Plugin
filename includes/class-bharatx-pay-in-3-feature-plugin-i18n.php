@@ -43,5 +43,4 @@ class Bharatx_Pay_In_3_Feature_Plugin_i18n {
 	}
 
 
-
 }

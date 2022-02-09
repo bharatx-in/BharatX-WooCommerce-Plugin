@@ -57,7 +57,7 @@ class Bharatx_Pay_In_3_Feature_Plugin_Admin {
 	}
 
 	/**
-	 * Initialize Stripe external paymentgateway.
+	 * Initialize external paymentgateway.
 	 *
 	 * @since    1.0.0
 	 * @param      array $gateways       Payment Gateways.

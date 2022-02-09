@@ -38,11 +38,31 @@ if ( ! defined( 'WPINC' ) ) {
 define( 'BHARATX PAY IN 3 FEATURE PLUGIN_VERSION', '1.0.0' );
 
 /**
+ * Currently plugin slug.
+ */
+define( 'BHARATX_PAY_IN_3_FEATURE_SLUG', 'bharatx-pay-in-3-feature' );
+
+/**
+ * Currently plugin file.
+ */
+define( 'BHARATX_PAY_IN_3_FEATURE_FILE', __FILE__ );
+
+/**
+ * Currently plugin basename.
+ */
+define( 'BHARATX_PAY_IN_3_FEATURE_BASENAME', plugin_basename( BHARATX_PAY_IN_3_FEATURE_FILE ) );
+
+/**
+ * Currently plugin dir.
+ */
+define( 'BHARATX_PAY_IN_3_FEATURE_DIR', untrailingslashit( plugin_dir_path( __FILE__ ) ) );
+
+/**
  * The code that runs during plugin activation.
  * This action is documented in includes/class-bharatx pay in 3 feature plugin-activator.php
  */
-function activate_bharatx pay in 3 feature plugin() {
-	require_once plugin_dir_path( __FILE__ ) . 'includes/class-bharatx pay in 3 feature plugin-activator.php';
+function activate_bharatx_pay_in_3_feature_plugin() {
+	require_once plugin_dir_path( __FILE__ ) . 'includes/class-bharatx-pay-in-3-feature-plugin-activator.php';
 	Bharatx_Pay_In_3_Feature_Plugin_Activator::activate();
 }
 
@@ -50,19 +70,19 @@ function activate_bharatx pay in 3 feature plugin() {
  * The code that runs during plugin deactivation.
  * This action is documented in includes/class-bharatx pay in 3 feature plugin-deactivator.php
  */
-function deactivate_bharatx pay in 3 feature plugin() {
-	require_once plugin_dir_path( __FILE__ ) . 'includes/class-bharatx pay in 3 feature plugin-deactivator.php';
+function deactivate_bharatx_pay_in_3_feature_plugin() {
+	require_once plugin_dir_path( __FILE__ ) . 'includes/class-bharatx-pay-in-3-feature-plugin-deactivator.php';
 	Bharatx_Pay_In_3_Feature_Plugin_Deactivator::deactivate();
 }
 
-register_activation_hook( __FILE__, 'activate_bharatx pay in 3 feature plugin' );
-register_deactivation_hook( __FILE__, 'deactivate_bharatx pay in 3 feature plugin' );
+register_activation_hook( __FILE__, 'activate_bharatx_pay_in_3_feature_plugin' );
+register_deactivation_hook( __FILE__, 'deactivate_bharatx_pay_in_3_feature_plugin' );
 
 /**
  * The core plugin class that is used to define internationalization,
  * admin-specific hooks, and public-facing site hooks.
  */
-require plugin_dir_path( __FILE__ ) . 'includes/class-bharatx pay in 3 feature plugin.php';
+require plugin_dir_path( __FILE__ ) . 'includes/class-bharatx-pay-in-3-feature-plugin.php';
 
 /**
  * Begins execution of the plugin.
@@ -73,7 +93,7 @@ require plugin_dir_path( __FILE__ ) . 'includes/class-bharatx pay in 3 feature p
  *
  * @since    1.0.0
  */
-function run_bharatx pay in 3 feature plugin() {
+function run_bharatx_pay_in_3_feature_plugin() {
 
 	$plugin = new Bharatx_Pay_In_3_Feature_Plugin();
 	$plugin->run();
@@ -84,7 +104,7 @@ function run_bharatx pay in 3 feature plugin() {
 * Check if WooCommerce is active
 */
 if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', get_option( 'active_plugins' ) ) ) ) {
-	run_bharatx pay in 3 feature plugin();
+	run_bharatx_pay_in_3_feature_plugin();
 } else {
 	add_action( 'admin_notices', 'bharatx_pay_in_3_feature_installed_notice' );
 }
@@ -92,7 +112,7 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 /**
  * Display Woocommerce Activation notice.
  */
-function simpl_pay_in_3_for_woocommerce_installed_notice() {     ?>
+function bharatx_pay_in_3_feature_installed_notice() {     ?>
 	<div class="error">
 	  <p><?php echo esc_html__( 'BharatX Pay-in-3 feature requires WooCommerce Plugin. Please install or activate WooCommerce', 'bharatx-pay-in-3-for-woocommerce' ); ?></p>
 	</div>

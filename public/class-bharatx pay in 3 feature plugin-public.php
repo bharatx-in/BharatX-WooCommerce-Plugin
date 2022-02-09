@@ -92,10 +92,10 @@ class Bharatx_Pay_In_3_Feature_Plugin_Public {
 		$this->supported_countries = array( 'IN' );
 
 		$this->strings = array(
-			'price_string'               => 'Or 3 interest free payments of {{ amount }} with {{ logo }} {{ info_icon }}',
+			'price_string'               => '3 interest free payments of {{ amount }} with {{ logo }} {{ info_icon }}',
 			'payment_method_title'       => 'BharatX',
 			'payment_method_description' => 'Pay In 3',
-			'varying_product_payment_description' => 'Or 3 interest free payments starting with {{ amount }} on {{ logo }} {{ info_icon }}'
+			'varying_product_payment_description' => '3 interest free payments starting with {{ amount }} on {{ logo }} {{ info_icon }}'
 		);
 
 		add_action( 'init', array( $this, 'init' ) );
@@ -189,7 +189,7 @@ class Bharatx_Pay_In_3_Feature_Plugin_Public {
 	 */
 	public function bharatx_price_text() {
 		global $product;
-		if ( 'bharatxe' === $product->get_type() ) {
+		if ( 'simple' === $product->get_type() ) {
 			$price = $product->get_price();
 			echo wp_kses_post( $this->get_bharatx_price_text( $price, 'product' ) );
 		}
@@ -296,7 +296,7 @@ class Bharatx_Pay_In_3_Feature_Plugin_Public {
 	 * @param float  $price Price.
 	 * @param string $page Page Name.
 	 */
-	public function get_bharatx_price_text( $price, $page, $type='bharatx' ) {
+	public function get_bharatx_price_text( $price, $page, $type='simple' ) {
 		$popup_image     = $this->settings['merchant_popup_image'];
 		$featherlight    = '';
 		$amount_in_paise = (int) ( round( $price, 2 ) * 100 );
@@ -319,7 +319,7 @@ class Bharatx_Pay_In_3_Feature_Plugin_Public {
 
 		$info_icon       = '<img src="' . esc_html( plugin_dir_url( __FILE__ ) . 'images/info.svg' ) . '"/>';
 		if ( empty( $popup_image ) ) {
-			$popup_image = '';
+			$popup_image = 'https://bharatx.tech/wp-content/webp-express/webp-images/uploads/2021/10/p2.png.webp';
 		}
 
 		$featherlight = 'data-featherlight="' . $popup_image . '"';
@@ -333,7 +333,7 @@ class Bharatx_Pay_In_3_Feature_Plugin_Public {
 		}
 
 		ob_start();
-		if($type == 'bharatxe'){
+		if($type == 'simple'){
 			$string       = $this->strings['price_string'];
 		}else{
 			$string       = $this->strings['varying_product_payment_description'];
@@ -362,7 +362,7 @@ class Bharatx_Pay_In_3_Feature_Plugin_Public {
 		if ( is_admin() ) {
 			return $title;
 		}
-		if ( bharatx_PAY_IN_3_FOR_WOOCOMMERCE_SLUG === $id ) {
+		if ( BHARATX_PAY_IN_3_FEATURE_SLUG === $id ) {
 
 			if( $this->settings['checkout_page_payment_method_title'] ) {
 				$title = $this->settings['checkout_page_payment_method_title'];
@@ -385,7 +385,7 @@ class Bharatx_Pay_In_3_Feature_Plugin_Public {
 		if ( is_admin() ) {
 			return $description;
 		}
-		if ( bharatx_PAY_IN_3_FEATURE_SLUG === $id ) {
+		if ( BHARATX_PAY_IN_3_FEATURE_SLUG === $id ) {
 			if( $this->settings['checkout_page_payment_method_description'] ) {
 				$description = $this->settings['checkout_page_payment_method_description'];
 			} else {

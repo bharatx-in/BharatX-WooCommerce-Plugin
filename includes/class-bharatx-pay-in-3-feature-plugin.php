@@ -73,12 +73,19 @@ class Bharatx_Pay_In_3_Feature_Plugin {
 		} else {
 			$this->version = '1.0.0';
 		}
-		$this->plugin_name = 'Bharatx pay in 3 feature plugin';
+		if ( defined( 'BHARATX_PAY_IN_3_FEATURE_SLUG' ) ) {
+			$this->plugin_name = BHARATX_PAY_IN_3_FEATURE_SLUG;
+		} else {
+			$this->plugin_name = 'Bharatx pay in 3 feature plugin';
+		}
 
 		$this->load_dependencies();
 		$this->set_locale();
 		$this->define_admin_hooks();
 		$this->define_public_hooks();
+
+		add_action( 'plugins_loaded', array( $this, 'init_gateway_class' ) );
+		add_filter( 'plugin_action_links_' . BHARATX_PAY_IN_3_FEATURE_BASENAME, array( $this, 'plugin_page_settings_link' ), 10, 1 );
 
 	}
 
@@ -104,24 +111,24 @@ class Bharatx_Pay_In_3_Feature_Plugin {
 		 * The class responsible for orchestrating the actions and filters of the
 		 * core plugin.
 		 */
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-bharatx pay in 3 feature plugin-loader.php';
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-bharatx-pay-in-3-feature-plugin-loader.php';
 
 		/**
 		 * The class responsible for defining internationalization functionality
 		 * of the plugin.
 		 */
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-bharatx pay in 3 feature plugin-i18n.php';
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-bharatx-pay-in-3-feature-plugin-i18n.php';
 
 		/**
 		 * The class responsible for defining all actions that occur in the admin area.
 		 */
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/class-bharatx pay in 3 feature plugin-admin.php';
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/class-bharatx-pay-in-3-feature-plugin-admin.php';
 
 		/**
 		 * The class responsible for defining all actions that occur in the public-facing
 		 * side of the site.
 		 */
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-bharatx pay in 3 feature plugin-public.php';
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-bharatx-pay-in-3-feature-plugin-public.php';
 
 		$this->loader = new Bharatx_Pay_In_3_Feature_Plugin_Loader();
 
@@ -154,9 +161,6 @@ class Bharatx_Pay_In_3_Feature_Plugin {
 	private function define_admin_hooks() {
 
 		$plugin_admin = new Bharatx_Pay_In_3_Feature_Plugin_Admin( $this->get_plugin_name(), $this->get_version() );
-
-		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles' );
-		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
 
 	}
 
@@ -235,7 +239,7 @@ class Bharatx_Pay_In_3_Feature_Plugin {
 	public function plugin_page_settings_link( $links ) {
 
 		$action_links = array(
-			'settings' => '<a href="' . admin_url( 'admin.php?page=wc-settings&tab=checkout&section=bharatx-pay-in-3-feature-plugin' ) . '" aria-label="' . esc_attr__( 'View settings', 'bharatx-pay-in-3-feature' ) . '">' . esc_html__( 'Settings', 'bharatx-pay-in-3-feature' ) . '</a>',
+			'settings' => '<a href="' . admin_url( 'admin.php?page=wc-settings&tab=checkout&section=bharatx-pay-in-3' ) . '" aria-label="' . esc_attr__( 'View settings', 'bharatx-pay-in-3-feature' ) . '">' . esc_html__( 'Settings', 'bharatx-pay-in-3-feature' ) . '</a>',
 		);
 
 		return array_merge( $action_links, $links );
