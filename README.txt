@@ -1,114 +1,92 @@
 === Plugin Name ===
-Contributors: (this should be a list of wordpress.org userid's)
-Donate link: https://www.bharatx.tech
-Tags: comments, spam
-Requires at least: 3.0.1
-Tested up to: 3.4
-Stable tag: 4.3
+Contributors: bharatxdev
+Tags: bharatx, payments, paylater, installments
+Requires at least: 5.3.2
+Version: 1.3.0
+Tested up to: 5.9
+Stable tag: 1.3.0
+Requires PHP: 5.6
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Here is a short description of the plugin.  This should be no more than 150 characters.  No markup here.
+BharatX Pay In 3 plugin is a payment gateway plugin which allows you to accept payments in 3 easy instalments.
 
-== Description ==
+== Description ==  
 
-This is the long description.  No limit, and you can use Markdown (as well as in the following sections).
+BharatX Pay in 3 is a white-labeled Pay in 3 parts plugin 
+which allows your customers to split their payments into
+3 parts, one tap, with any documentation. 
+The user gets access to “Buy now pay later”, and has to
+pay 1/3rd of the amount at the time of placing the order 
+and the rest after 30 days and 60 days, with no extra charge.
+The payment gateway would be a standalone feature at the checkout
+page and can be customised as per your needs. 
+For example, it can also be called “YourBrandName Pay in 3", 
+helping you to build/strengthen your brand name further, 
+and building customers trust and engagement with your website. 
+After the customer chooses Pay in 3 on the checkout page, 
+the customer goes through a one minute sign-in process via 
+a popup and after the payment is completed, is redirected 
+to the payment confirmation page, making it a seamless 
+process with low drop-off due to the ease of the flow.
 
-For backwards compatibility, if this section is missing, the full length of the short description will be used, and
-Markdown parsed.
 
-A few notes about the sections above:
+### Key Features
 
-*   "Contributors" is a comma separated list of wp.org/wp-plugins.org usernames
-*   "Tags" is a comma separated list of tags that apply to the plugin
-*   "Requires at least" is the lowest version that the plugin will work on
-*   "Tested up to" is the highest version that you've *successfully used to test the plugin*. Note that it might work on
-higher versions... this is just the highest one you've verified.
-*   Stable tag should indicate the Subversion "tag" of the latest stable version, or "trunk," if you use `/trunk/` for
-stable.
-
-    Note that the `readme.txt` of the stable tag is the one that is considered the defining one for the plugin, so
-if the `/trunk/readme.txt` file says that the stable tag is `4.3`, then it is `/tags/4.3/readme.txt` that'll be used
-for displaying information about the plugin.  In this situation, the only thing considered from the trunk `readme.txt`
-is the stable tag pointer.  Thus, if you develop in trunk, you can update the trunk `readme.txt` to reflect changes in
-your in-development version, without having that information incorrectly disclosed about the current stable version
-that lacks those changes -- as long as the trunk's `readme.txt` points to the correct stable tag.
-
-    If no stable tag is provided, it is assumed that trunk is stable, but you should specify "trunk" if that's where
-you put the stable version, in order to eliminate any doubt.
+* Integrate a white-labelled Pay in 3 feature at the checkout page 
+* Allow customers to pay in 3 easy instalments
+* Includes a widget at the product page displaying the Pay in 3- features.
+* 0 Documentation, no hidden fees and charges
+* 1 minute hassle-free seamless setup
+* Works like a payment gateway. Integrate it like a payment gateway. Receive funds like a payment gateway on T+1, with no business risk.
 
 == Installation ==
 
-This section describes how to install the plugin and get it working.
+= Automatic installation =
 
-e.g.
+1. Log into your WordPress admin
+2. Click __Plugins__
+3. Click __Add New__
+4. Search for __BharatX Pay In 3 Feature__
+5. Click __Install Now__ under "BharatX Pay In 3 Feature"
+6. Activate the plugin
 
-1. Upload `bharatx pay in 3 feature plugin.php` to the `/wp-content/plugins/` directory
-1. Activate the plugin through the 'Plugins' menu in WordPress
-1. Place `<?php do_action('plugin_name_hook'); ?>` in your templates
+= Manual installation =
+
+1. Download the plugin
+2. Extract the contents of the zip file
+3. Upload the contents of the zip file to the `wp-content/plugins/` folder of your WordPress installation
+4. Activate the Code Snippets plugin from 'Plugins' page
+
+https://youtu.be/MvErwlo-LQA
+
 
 == Frequently Asked Questions ==
 
-= A question that someone might have =
+= Do you have any credentials using which I can test your product out? =
 
-An answer to that question.
+For testing purposes you can enter the following testing credentials made up of your API key and secret key.
 
-= What about foo bar? =
+Merchant Partner Id: testPartnerId
+Merchant Private Key: testPrivateKey
 
-Answer to foo bar dilemma.
+= What happens if I transact with test credentials? =
 
-== Screenshots ==
+All successfull transactions with the testing credentials will be refunded within 24hrs.
+You can get support for this by mailing us at contact@bharatx.tech.
 
-1. This screen shot description corresponds to screenshot-1.(png|jpg|jpeg|gif). Note that the screenshot is taken from
-the /assets directory or the directory that contains the stable readme.txt (tags or trunk). Screenshots in the /assets
-directory take precedence. For example, `/assets/screenshot-1.png` would win over `/tags/4.3/screenshot-1.png`
-(or jpg, jpeg, gif).
-2. This is the second screen shot
+= I have checked the product out. I want to go live with it. How do I do that? =
+
+That's amazing! Welcome to the BharatX family. We just need a few details from you to go live.
+You can email jainam@bharatx.tech to get you sorted within 2 working hours.
+
+
 
 == Changelog ==
+= 1.2.1 =
 
-= 1.0 =
-* A change since the previous version.
-* Another change.
+* Security and UI enhancements
 
-= 0.5 =
-* List versions from most recent at top to oldest at bottom.
+= 1.2.0 =
 
-== Upgrade Notice ==
-
-= 1.0 =
-Upgrade notices describe the reason a user should upgrade.  No more than 300 characters.
-
-= 0.5 =
-This version fixes a security related bug.  Upgrade immediately.
-
-== Arbitrary section ==
-
-You may provide arbitrary sections, in the same format as the ones above.  This may be of use for extremely complicated
-plugins where more information needs to be conveyed that doesn't fit into the categories of "description" or
-"installation."  Arbitrary sections will be shown below the built-in sections outlined above.
-
-== A brief Markdown Example ==
-
-Ordered list:
-
-1. Some feature
-1. Another feature
-1. Something else about the plugin
-
-Unordered list:
-
-* something
-* something else
-* third thing
-
-Here's a link to [WordPress](http://wordpress.org/ "Your favorite software") and one to [Markdown's Syntax Documentation][markdown syntax].
-Titles are optional, naturally.
-
-[markdown syntax]: http://daringfireball.net/projects/markdown/syntax
-            "Markdown is what the parser uses to process much of the readme file"
-
-Markdown uses email style notation for blockquotes and I've been told:
-> Asterisks for *emphasis*. Double it up  for **strong**.
-
-`<?php code(); // goes in backticks ?>`
+* Initial Release
