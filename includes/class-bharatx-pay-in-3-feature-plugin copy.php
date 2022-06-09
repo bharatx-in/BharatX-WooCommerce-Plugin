@@ -7,7 +7,7 @@
  * public-facing side of the site and the admin area.
  *
  * @link       https://www.bharatx.tech
- * @since      1.0.0
+ * @since      1.2.0
  *
  * @package    Bharatx_Pay_In_3_Feature_Plugin
  * @subpackage Bharatx_Pay_In_3_Feature_Plugin/includes
@@ -22,7 +22,7 @@
  * Also maintains the unique identifier of this plugin as well as the current
  * version of the plugin.
  *
- * @since      1.0.0
+ * @since      1.2.0
  * @package    Bharatx_Pay_In_3_Feature_Plugin
  * @subpackage Bharatx_Pay_In_3_Feature_Plugin/includes
  * @author     BharatX <Karan@bharatx.tech>
@@ -34,7 +34,7 @@ class Bharatx_Pay_In_3_Feature_Plugin {
 	 * The loader that's responsible for maintaining and registering all hooks that power
 	 * the plugin.
 	 *
-	 * @since    1.0.0
+	 * @since    1.2.0
 	 * @access   protected
 	 * @var      Bharatx_Pay_In_3_Feature_Plugin_Loader    $loader    Maintains and registers all hooks for the plugin.
 	 */
@@ -43,7 +43,7 @@ class Bharatx_Pay_In_3_Feature_Plugin {
 	/**
 	 * The unique identifier of this plugin.
 	 *
-	 * @since    1.0.0
+	 * @since    1.2.0
 	 * @access   protected
 	 * @var      string    $plugin_name    The string used to uniquely identify this plugin.
 	 */
@@ -52,7 +52,7 @@ class Bharatx_Pay_In_3_Feature_Plugin {
 	/**
 	 * The current version of the plugin.
 	 *
-	 * @since    1.0.0
+	 * @since    1.2.0
 	 * @access   protected
 	 * @var      string    $version    The current version of the plugin.
 	 */
@@ -65,18 +65,18 @@ class Bharatx_Pay_In_3_Feature_Plugin {
 	 * Load the dependencies, define the locale, and set the hooks for the admin area and
 	 * the public-facing side of the site.
 	 *
-	 * @since    1.0.0
+	 * @since    1.2.0
 	 */
 	public function __construct() {
 		if ( defined( 'BHARATX_PAY_IN_3_FEATURE_PLUGIN_VERSION' ) ) {
 			$this->version = BHARATX_PAY_IN_3_FEATURE_PLUGIN_VERSION;
 		} else {
-			$this->version = '1.0.0';
+			$this->version = '1.2.0';
 		}
-		if ( defined( 'BHARATX_PAY_IN_3_FEATURE_SLUG' ) ) {
-			$this->plugin_name = BHARATX_PAY_IN_3_FEATURE_SLUG;
+		if ( defined( 'BHARATX_PAY_IN_3_FEATURE_PLUGIN_SLUG' ) ) {
+			$this->plugin_name = BHARATX_PAY_IN_3_FEATURE_PLUGIN_SLUG;
 		} else {
-			$this->plugin_name = 'Bharatx pay in 3 feature plugin';
+			$this->plugin_name = 'Bharatx-pay-in-3-feature-plugin';
 		}
 
 		$this->load_dependencies();
@@ -85,7 +85,7 @@ class Bharatx_Pay_In_3_Feature_Plugin {
 		$this->define_public_hooks();
 
 		add_action( 'plugins_loaded', array( $this, 'init_gateway_class' ) );
-		add_filter( 'plugin_action_links_' . BHARATX_PAY_IN_3_FEATURE_BASENAME, array( $this, 'plugin_page_settings_link' ), 10, 1 );
+		add_filter( 'plugin_action_links_' . BHARATX_PAY_IN_3_FEATURE_PLUGIN_BASENAME, array( $this, 'plugin_page_settings_link' ), 10, 1 );
 
 	}
 
@@ -102,7 +102,7 @@ class Bharatx_Pay_In_3_Feature_Plugin {
 	 * Create an instance of the loader which will be used to register the hooks
 	 * with WordPress.
 	 *
-	 * @since    1.0.0
+	 * @since    1.2.0
 	 * @access   private
 	 */
 	private function load_dependencies() {
@@ -140,7 +140,7 @@ class Bharatx_Pay_In_3_Feature_Plugin {
 	 * Uses the Bharatx_Pay_In_3_Feature_Plugin_i18n class in order to set the domain and to register the hook
 	 * with WordPress.
 	 *
-	 * @since    1.0.0
+	 * @since    1.2.0
 	 * @access   private
 	 */
 	private function set_locale() {
@@ -155,7 +155,7 @@ class Bharatx_Pay_In_3_Feature_Plugin {
 	 * Register all of the hooks related to the admin area functionality
 	 * of the plugin.
 	 *
-	 * @since    1.0.0
+	 * @since    1.2.0
 	 * @access   private
 	 */
 	private function define_admin_hooks() {
@@ -168,7 +168,7 @@ class Bharatx_Pay_In_3_Feature_Plugin {
 	 * Register all of the hooks related to the public-facing functionality
 	 * of the plugin.
 	 *
-	 * @since    1.0.0
+	 * @since    1.2.0
 	 * @access   private
 	 */
 	private function define_public_hooks() {
@@ -183,7 +183,7 @@ class Bharatx_Pay_In_3_Feature_Plugin {
 	/**
 	 * Run the loader to execute all of the hooks with WordPress.
 	 *
-	 * @since    1.0.0
+	 * @since    1.2.0
 	 */
 	public function run() {
 		$this->loader->run();
@@ -193,7 +193,7 @@ class Bharatx_Pay_In_3_Feature_Plugin {
 	 * The name of the plugin used to uniquely identify it within the context of
 	 * WordPress and to define internationalization functionality.
 	 *
-	 * @since     1.0.0
+	 * @since     1.2.0
 	 * @return    string    The name of the plugin.
 	 */
 	public function get_plugin_name() {
@@ -203,7 +203,7 @@ class Bharatx_Pay_In_3_Feature_Plugin {
 	/**
 	 * The reference to the class that orchestrates the hooks with the plugin.
 	 *
-	 * @since     1.0.0
+	 * @since     1.2.0
 	 * @return    Bharatx_Pay_In_3_Feature_Plugin_Loader    Orchestrates the hooks of the plugin.
 	 */
 	public function get_loader() {
@@ -213,7 +213,7 @@ class Bharatx_Pay_In_3_Feature_Plugin {
 	/**
 	 * Retrieve the version number of the plugin.
 	 *
-	 * @since     1.0.0
+	 * @since     1.2.0
 	 * @return    string    The version number of the plugin.
 	 */
 	public function get_version() {
@@ -223,23 +223,23 @@ class Bharatx_Pay_In_3_Feature_Plugin {
 	/**
 	 * Include plugin gateway class file
 	 *
-	 * @since    1.0.0
+	 * @since    1.2.0
 	 */
 	public function init_gateway_class() {
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/class-bharatx-pay-in-3-feature-gateway.php';
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/class-bharatx-pay-in-3-feature-plugin-gateway.php';
 	}
 
 	/**
 	 * Plugin page settings.
 	 *
-	 * @since   1.0.0
+	 * @since   1.2.0
 	 * @param       Array $links  Plugin Settings page link.
 	 * @return      Array $links       Plugin Settings page link.
 	 */
 	public function plugin_page_settings_link( $links ) {
 
 		$action_links = array(
-			'settings' => '<a href="' . admin_url( 'admin.php?page=wc-settings&tab=checkout&section=bharatx-pay-in-3' ) . '" aria-label="' . esc_attr__( 'View settings', 'bharatx-pay-in-3-feature' ) . '">' . esc_html__( 'Settings', 'bharatx-pay-in-3-feature' ) . '</a>',
+			'settings' => '<a href="' . admin_url( 'admin.php?page=wc-settings&tab=checkout&section=bharatx-pay-in-3-feature-plugin' ) . '" aria-label="' . esc_attr__( 'View settings', 'bharatx-pay-in-3-feature-plugin' ) . '">' . esc_html__( 'Settings', 'bharatx-pay-in-3-feature-plugin' ) . '</a>',
 		);
 
 		return array_merge( $action_links, $links );

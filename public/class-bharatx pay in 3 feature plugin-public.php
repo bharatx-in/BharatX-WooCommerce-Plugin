@@ -4,7 +4,7 @@
  * The public-facing functionality of the plugin.
  *
  * @link       https://www.bharatx.tech
- * @since      1.0.0
+ * @since      1.2.0
  *
  * @package    Bharatx_Pay_In_3_Feature_Plugin
  * @subpackage Bharatx_Pay_In_3_Feature_Plugin/public
@@ -25,7 +25,7 @@ class Bharatx_Pay_In_3_Feature_Plugin_Public {
 	/**
 	 * The ID of this plugin.
 	 *
-	 * @since    1.0.0
+	 * @since    1.2.0
 	 * @access   private
 	 * @var      string    $plugin_name    The ID of this plugin.
 	 */
@@ -34,7 +34,7 @@ class Bharatx_Pay_In_3_Feature_Plugin_Public {
 	/**
 	 * The version of this plugin.
 	 *
-	 * @since    1.0.0
+	 * @since    1.2.0
 	 * @access   private
 	 * @var      string    $version    The current version of this plugin.
 	 */
@@ -43,7 +43,7 @@ class Bharatx_Pay_In_3_Feature_Plugin_Public {
 	/**
 	 * Initialize the class and set its properties.
 	 *
-	 * @since    1.0.0
+	 * @since    1.2.0
 	 * @param      string    $plugin_name       The name of the plugin.
 	 * @param      string    $version    The version of this plugin.
 	 */
@@ -51,7 +51,7 @@ class Bharatx_Pay_In_3_Feature_Plugin_Public {
 	/**
 	 * The settings of this plugin.
 	 *
-	 * @since    1.0.0
+	 * @since    1.2.0
 	 * @access   private
 	 * @var      array    $settings    Settings of this plugin.
 	 */
@@ -60,7 +60,7 @@ class Bharatx_Pay_In_3_Feature_Plugin_Public {
 	/**
 	 * The strings of this plugin.
 	 *
-	 * @since    1.0.0
+	 * @since    1.2.0
 	 * @access   private
 	 * @var      array    $strings    Strings of this plugin.
 	 */
@@ -70,17 +70,20 @@ class Bharatx_Pay_In_3_Feature_Plugin_Public {
 	/**
 	 * The supported countries of this plugin.
 	 *
-	 * @since    1.0.0
+	 * @since    1.2.0
 	 * @access   private
 	 * @var      array    $supported_countries  Supported countries of this plugin.
 	 */
-
 	private $supported_countries;
+	private $max_limit;
+
+	private $category_ids;
+
 
 	/**
 	 * Initialize the class and set its properties.
 	 *
-	 * @since    1.0.0
+	 * @since    1.2.0
 	 * @param      string $plugin_name       The name of the plugin.
 	 * @param      string $version    The version of this plugin.
 	 */
@@ -90,11 +93,14 @@ class Bharatx_Pay_In_3_Feature_Plugin_Public {
 		$this->plugin_name         = $plugin_name;
 		$this->version             = $version;
 		$this->supported_countries = array( 'IN' );
+		$this->max_limit	       = 15000;
+	//	$this->category_ids		   = $this->settings['category_ids'];
+
 
 		$this->strings = array(
-			'price_string'               => '3 interest free payments of {{ amount }} with {{ logo }} {{ info_icon }}',
-			'payment_method_title'       => 'BharatX',
-			'payment_method_description' => 'Pay In 3',
+			'price_string'               => 'Or 3 interest free payments of {{ amount }} with {{ logo }} {{ info_icon }}',
+			'payment_method_title'       => 'Pay In 3 via '   ,
+			'payment_method_description' => 'Pay In 3 Easy Installments',
 			'varying_product_payment_description' => '3 interest free payments starting with {{ amount }} on {{ logo }} {{ info_icon }}'
 		);
 
@@ -105,10 +111,12 @@ class Bharatx_Pay_In_3_Feature_Plugin_Public {
 	public function init() {
 		
 		$available_payment_methods = WC()->payment_gateways->get_available_payment_gateways();
-		if ( isset( $available_payment_methods['bharatx-pay-in-3-feature'] ) ) {
-			$this->settings = $available_payment_methods['bharatx-pay-in-3-feature']->settings;
+		if ( isset( $available_payment_methods['bharatx-pay-in-3-feature-plugin'] ) ) {
+			$this->settings = $available_payment_methods['bharatx-pay-in-3-feature-plugin']->settings;
 
+			add_filter( 'woocommerce_available_payment_gateways', array( $this, 'remove_gateway_based_on_billing_total' ), 10, 2 );
 			add_filter( 'woocommerce_available_payment_gateways', array( $this, 'remove_gateway_based_on_billing_country' ), 10, 2 );
+			add_filter( 'woocommerce_available_payment_gateways', array( $this, 'remove_gateway_based_on_category_id' ), 10, 2 );
 
 			add_action( 'woocommerce_single_product_summary', array( $this, 'bharatx_price_text' ), 12 );
 			add_action( 'woocommerce_before_add_to_cart_button', array($this, 'variation_price_text'), 10);
@@ -127,7 +135,7 @@ class Bharatx_Pay_In_3_Feature_Plugin_Public {
 	/**
 	 * Register the stylesheets for the public-facing side of the site.
 	 *
-	 * @since    1.0.0
+	 * @since    1.2.0
 	 */
 	
 	public function enqueue_styles() {
@@ -144,14 +152,14 @@ class Bharatx_Pay_In_3_Feature_Plugin_Public {
 		 * class.
 		 */
 
-		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/bharatx pay in 3 feature plugin-public.css', array(), $this->version, 'all' );
+		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/bharatx-pay-in-3-feature-plugin-public.css', array(), $this->version, 'all' );
 
 	}
 
 	/**
 	 * Register the JavaScript for the public-facing side of the site.
 	 *
-	 * @since    1.0.0
+	 * @since    1.2.0
 	 */
 	public function enqueue_scripts() {
 		wp_enqueue_script( 'featherlight', plugin_dir_url( __FILE__ ) . 'js/featherlight.js', array( 'jquery' ), $this->version, false );
@@ -160,7 +168,7 @@ class Bharatx_Pay_In_3_Feature_Plugin_Public {
 	/**
 	 * Remove payment gateway based on country.
 	 *
-	 * @since    1.0.0
+	 * @since    1.2.0
 	 * @param      array $available_gateways       Available Payment Gateways.
 	 * @return     array $available_gateways       Available Payment Gateways.
 	 */
@@ -174,24 +182,81 @@ class Bharatx_Pay_In_3_Feature_Plugin_Public {
 		$country_code = WC()->customer->get_billing_country();
 		if ( $country_code ) {
 			if ( ! in_array( $country_code, $this->supported_countries, true ) ) {
-				if ( isset( $available_gateways['bharatx-pay-in-3-feature'] ) ) {
-					unset( $available_gateways['bharatx-pay-in-3-feature'] );
-				}
+				 unset( $available_gateways['bharatx-pay-in-3-feature-plugin'] ) ;
+				 unset($this->strings['price_string']);
 			}
 		}
 		return $available_gateways;
 	}
 
+
+
+	public function remove_gateway_based_on_billing_total( $available_gateways ) {
+		if ( is_admin() ) {
+			return $available_gateways;
+		}
+		if ( ! WC()->customer ) {
+			return $available_gateways;
+		}
+		$total = WC()->cart->get_total('edit');
+		$totals = intval($total);
+		if ( $totals >= $this->max_limit ) {
+			if ( isset( $available_gateways['bharatx-pay-in-3-feature-plugin'] ) ) {
+				unset( $available_gateways['bharatx-pay-in-3-feature-plugin'] );
+				unset($this->strings['price_string']);
+			}
+		}
+		return $available_gateways;
+	}
+
+
+	/**
+ * @snippet       Disable Payment Method for Specific Category
+*/
+	public function remove_gateway_based_on_category_id( $available_gateways ) {
+		if ( is_admin() ) {
+			return $available_gateways;
+		}
+		if ( ! WC()->customer ) {
+			return $available_gateways;
+		}
+		$cart_product_id = array();
+		foreach ( WC()->cart->get_cart() as $cart_item ) {
+			$product_id = $cart_item['product_id'];
+			array_push($cart_product_id, $product_id);
+		}
+  	    $category_ids = $this->settings['category_ids'] ;
+		$str		  = preg_split ("/\,/", $category_ids);
+    	$result 	  = array_diff($str, $cart_product_id);
+		if(count($result) < count($str)){
+			if ( isset( $available_gateways['bharatx-pay-in-3-feature-plugin'])){
+				unset( $available_gateways['bharatx-pay-in-3-feature-plugin']);
+				unset($this->strings['price_string']);
+			}
+    	}
+		return $available_gateways;
+	}
+
+     
+
+
+
 	/**
 	 * Display bharatx text on single product.
 	 *
-	 * @since    1.0.0
+	 * @since    1.2.0
 	 */
 	public function bharatx_price_text() {
 		global $product;
 		if ( 'simple' === $product->get_type() ) {
+			$category_ids = $this->settings['category_ids'] ;
+			$str		  = preg_split ("/\,/", $category_ids);
 			$price = $product->get_price();
+			$actual_price = intval($price);
+			$id = $product->get_id();
+			if($actual_price < $this->max_limit && !in_array($id,$str)){
 			echo wp_kses_post( $this->get_bharatx_price_text( $price, 'product' ) );
+			}
 		}
 	}
 
@@ -243,7 +308,7 @@ class Bharatx_Pay_In_3_Feature_Plugin_Public {
 
 	/**
 	 *
-	 * @since    1.0.0
+	 * @since    1.2.0
 	 * @param array  $value Value.
 	 * @param Object $product Product.
 	 * @param Object $variation Variation.
@@ -253,6 +318,11 @@ class Bharatx_Pay_In_3_Feature_Plugin_Public {
 		if ( null != $variation ) {
 			$price                = $variation->get_price();
 			$value['bharatx_price_text'] = $this->get_bharatx_price_text( $price, 'product' );
+			foreach($available_gateways as $gate){
+				if($gate == 'bharatx-pay-in-3-feature-plugin'){
+					unset($available_gateways['bharatx-pay-in-3-feature-plugin']);
+				}
+			}
 		}
 		return $value;
 	}
@@ -260,13 +330,16 @@ class Bharatx_Pay_In_3_Feature_Plugin_Public {
 	/**
 	 * Display BharatX text on Checkout Page.
 	 *
-	 * @since    1.0.0
+	 * @since    1.2.0
 	 */
 	public function bharatx_price_text_checkout() {
 		$total = WC()->cart->get_total( 'edit' );
 		echo '<tr class="order-bharatx">';
 			echo '<td colspan="2">';
-				echo wp_kses_post( $this->get_bharatx_price_text( $total, 'checkout' ) );
+				$totals = intval($total);
+				if($totals < $this->max_limit){
+					echo wp_kses_post( $this->get_bharatx_price_text( $total, 'checkout' ) );
+				}
 			echo '</td>';
 		echo '</tr>';
 	}
@@ -274,15 +347,18 @@ class Bharatx_Pay_In_3_Feature_Plugin_Public {
 	/**
 	 * Display Bharatx text on Cart Page.
 	 *
-	 * @since    1.0.0
+	 * @since    1.2.0
 	 */
 	public function after_cart_totals(){
 		$total = WC()->cart->get_total( 'edit' );
+		$totals = intval($total);
 		?>
         <tr class="bharatx-cart-text">
         	<td colspan="2">
             	<?php
-					echo wp_kses_post( $this->get_bharatx_price_text( $total, 'cart' ) );
+					if($totals < $this->max_limit){
+						echo wp_kses_post( $this->get_bharatx_price_text( $total, 'cart' ) );
+					}
 				?>
             </td>
         </tr>
@@ -290,39 +366,44 @@ class Bharatx_Pay_In_3_Feature_Plugin_Public {
 	}
 
 	/**
-	 * Ger bharatx text.
+	 * Get bharatx text.
 	 *
-	 * @since    1.0.0
+	 * @since    1.2.0
 	 * @param float  $price Price.
 	 * @param string $page Page Name.
 	 */
 	public function get_bharatx_price_text( $price, $page, $type='simple' ) {
-		$popup_image     = $this->settings['merchant_popup_image'];
 		$featherlight    = '';
-		$amount_in_paise = (int) ( round( $price, 2 ) * 100 );
-		$div             = (int) floor( $amount_in_paise / 3 );
-		$rem             = $amount_in_paise - ( $div * 3 );
-		$part            = (int) $div + (int) $rem;
-		$amount_in_rs    = (float) ( round( $part / 100, 2 ) );
+		$amount_in_paise =  round( $price, 2 );
+		$div             = (float) ( $amount_in_paise / 3 );
+		$amount_in_rs    = round($div,2);
 		$part            = wc_price( $amount_in_rs );
-		if ( $rem > 0 ) {
 			$args            = array(
 					'decimals'           => 2,
 				);
 			$part            = wc_price( $amount_in_rs, $args );
-		}
-		if( $this->settings['pay_in_3_note_bharatx_logo_image'] ) {
-			$image           = '<img class="bharatx-brand-logo" src="' . esc_html( $this->settings['pay_in_3_note_bharatx_logo_image'] ) . '"/>';
-		} else {
-			$image           = '<img class="bharatx-brand-logo" src="' . esc_html( plugin_dir_url( __FILE__ ) . 'images/brand.svg' ) . '"/>';
-		}
+			$image           = '<img class="bharatx-brand-logo" src="' . 'https://d30flbpbaljuso.cloudfront.net/img/partner/logo/light/'.  esc_html( $this->settings['merchant_partner_id'] ) . '"/>';
+		
 
-		$info_icon       = '<img src="' . esc_html( plugin_dir_url( __FILE__ ) . 'images/info.svg' ) . '"/>';
-		if ( empty( $popup_image ) ) {
-			$popup_image = 'https://bharatx.tech/wp-content/webp-express/webp-images/uploads/2021/10/p2.png.webp';
-		}
+			$info_icon       = '<img src="' . esc_html( plugin_dir_url( __FILE__ ) . 'images/info.svg' ) . '"/>';
+		
 
-		$featherlight = 'data-featherlight="' . $popup_image . '"';
+
+		    ?>
+                <script type="text/javascript">
+					jQuery(document).ready(function($){
+						var text = $('.product-bharatx-text-note').html();
+						if(jQuery('.product_title').length  && jQuery('.price').length){
+							$(".bharatx-price-variation-default-text").remove();
+							$(".product-bharatx-text-note").remove();
+							$(".product_title").append('<div class="bharatx-price-variation-default-text"> <p class="product-bharatx-text-note">' + text + '</p> </div>');	
+						}
+					});
+				</script>
+            <?php
+
+
+		$featherlight = 'data-featherlight="' . 'https://d30flbpbaljuso.cloudfront.net/img/partner/woocommerce/popups/'. $this->settings['merchant_partner_id'] .  '.png' .'"';
 		$interstitial_options = ' data-page="' . $page . '" ';
 		if ( is_singular( 'product' ) ) {
 			$object                = get_queried_object();
@@ -341,7 +422,7 @@ class Bharatx_Pay_In_3_Feature_Plugin_Public {
 		$placeholders = array(
 			'{{ amount }}'   => $part,
 			'{{ logo }}'     => sprintf( '<a class="bharatx-popup-link" href="#" %s %s><span class="product-bharatx-logo-text">%s</span></a>', $interstitial_options, $featherlight, $image ),
-			'{{ info_icon }}' => sprintf( '<a class="bharatx-popup-link" href="#" %s %s>%s</a>', $interstitial_options, $featherlight, $info_icon ),
+			'{{ info_icon }}' => sprintf( '<a class="bharatx-popup-link" href="#" %s %s>%s</a>', $interstitial_options, $featherlight, $info_icon),
 		);
 		$string       = str_replace( array_keys( $placeholders ), $placeholders, $string );
 		?>
@@ -353,7 +434,7 @@ class Bharatx_Pay_In_3_Feature_Plugin_Public {
 	/**
 	 * Return payment gateway title.
 	 *
-	 * @since    1.0.0
+	 * @since    1.2.0
 	 * @param string $title Title.
 	 * @param string $id Gateway Id.
 	 * @return string $title Title.
@@ -362,12 +443,12 @@ class Bharatx_Pay_In_3_Feature_Plugin_Public {
 		if ( is_admin() ) {
 			return $title;
 		}
-		if ( BHARATX_PAY_IN_3_FEATURE_SLUG === $id ) {
+		if ( BHARATX_PAY_IN_3_FEATURE_PLUGIN_SLUG === $id ) {
 
 			if( $this->settings['checkout_page_payment_method_title'] ) {
-				$title = $this->settings['checkout_page_payment_method_title'];
+				$title = $this->strings['payment_method_title'] . $this->settings['checkout_page_payment_method_title'];
 			} else {
-				$title = $this->strings['payment_method_title'];
+				$title = $this->strings['payment_method_title'] . 'BharatX';
 			}
 		}
 		return $title;
@@ -376,7 +457,7 @@ class Bharatx_Pay_In_3_Feature_Plugin_Public {
 	/**
 	 * Return payment gateway description.
 	 *
-	 * @since    1.0.0
+	 * @since    1.2.0
 	 * @param string $description description.
 	 * @param string $id Gateway Id.
 	 * @return string $description description.
@@ -385,7 +466,7 @@ class Bharatx_Pay_In_3_Feature_Plugin_Public {
 		if ( is_admin() ) {
 			return $description;
 		}
-		if ( BHARATX_PAY_IN_3_FEATURE_SLUG === $id ) {
+		if ( BHARATX_PAY_IN_3_FEATURE_PLUGIN_SLUG === $id ) {
 			if( $this->settings['checkout_page_payment_method_description'] ) {
 				$description = $this->settings['checkout_page_payment_method_description'];
 			} else {
@@ -394,5 +475,4 @@ class Bharatx_Pay_In_3_Feature_Plugin_Public {
 		}
 		return $description;
 	}
-
 }

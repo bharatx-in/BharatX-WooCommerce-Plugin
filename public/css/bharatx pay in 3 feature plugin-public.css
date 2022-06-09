@@ -1,9 +1,4 @@
 /**
- * All of the CSS for your public-facing functionality should be
- * included in this file.
- */
-
- /**
  * Featherlight – ultra slim jQuery lightbox
  * Version 1.7.13 - http://noelboss.github.io/featherlight/
  *
@@ -260,7 +255,7 @@ p.product-bharatx-text-note img{
 }
 p.product-bharatx-text-note img.bharatx-brand-logo{
 	height:17px;
-	width:60px;
+	width:50px;
 }
 p.product-bharatx-text-note .amount{
 	color:#000;
@@ -290,7 +285,7 @@ body.woocommerce-checkout .entry-content .woocommerce-checkout-review-order .woo
 	width: 100% !important;
 }
 
-body.woocommerce-checkout .entry-content .woocommerce-checkout-review-order .woocommerce-checkout-payment .wc_payment_methods>li.payment_method_bharatx-pay-in-3-for-woocommerce img{
+body.woocommerce-checkout .entry-content .woocommerce-checkout-review-order .woocommerce-checkout-payment .wc_payment_methods>li.payment_method_bharatx-pay-in-3-feature-plugin img{
 	bottom: 0;
 	height: auto;
 	left: auto;
