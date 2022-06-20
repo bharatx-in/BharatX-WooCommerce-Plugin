@@ -445,11 +445,10 @@ class Bharatx_Pay_In_3_Feature_Plugin_Public {
 			return $title;
 		}
 		if ( BHARATX_PAY_IN_3_FEATURE_PLUGIN_SLUG === $id ) {
-
-			if( $this->settings['checkout_page_payment_method_title'] ) {
-				$title = $this->strings['payment_method_title'] . $this->settings['checkout_page_payment_method_title'];
+			if( isset($this->settings['checkout_page_payment_method_title']) ) {
+				$title = $this->settings['checkout_page_payment_method_title'];
 			} else {
-				$title = $this->strings['payment_method_title'] . 'BharatX';
+				$title = 'BharatX Pay in 3';
 			}
 		}
 		return $title;
