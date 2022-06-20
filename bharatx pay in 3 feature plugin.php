@@ -9,19 +9,19 @@
  * that starts the plugin.
  *
  * @link              https://www.bharatx.tech
- * @since             1.0.0
+ * @since             1.2.0
  * @package           Bharatx_Pay_In_3_Feature_Plugin
  *
  * @wordpress-plugin
- * Plugin Name:       BharatX Pay In 3
- * Plugin URI:        none
- * Description:       This is a short description of what the plugin does. It's displayed in the WordPress admin area.
- * Version:           1.0.0
+ * Plugin Name:       BharatX Pay In 3 
+ * Plugin URI:        #
+ * Description:       Split orders into 3 interest-free payments
+ * Version:           1.4.2
  * Author:            BharatX
  * Author URI:        https://www.bharatx.tech
  * License:           GPL-2.0+
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
- * Text Domain:       bharatx pay in 3 feature plugin
+ * Text Domain:       bharatx-pay-in-3-feature-plugin
  * Domain Path:       /languages
  */
 
@@ -32,30 +32,30 @@ if ( ! defined( 'WPINC' ) ) {
 
 /**
  * Currently plugin version.
- * Start at version 1.0.0 and use SemVer - https://semver.org
+ * Start at version 1.2.0 and use SemVer - https://semver.org
  * Rename this for your plugin and update it as you release new versions.
  */
-define( 'BHARATX PAY IN 3 FEATURE PLUGIN_VERSION', '1.0.0' );
+define( 'BHARATX_PAY_IN_3_FEATURE_PLUGIN_VERSION', '1.2.0' );
 
 /**
  * Currently plugin slug.
  */
-define( 'BHARATX_PAY_IN_3_FEATURE_SLUG', 'bharatx-pay-in-3-feature' );
+define( 'BHARATX_PAY_IN_3_FEATURE_PLUGIN_SLUG', 'bharatx-pay-in-3-feature-plugin' );
 
 /**
  * Currently plugin file.
  */
-define( 'BHARATX_PAY_IN_3_FEATURE_FILE', __FILE__ );
+define( 'BHARATX_PAY_IN_3_FEATURE_PLUGIN_FILE', __FILE__ );
 
 /**
  * Currently plugin basename.
  */
-define( 'BHARATX_PAY_IN_3_FEATURE_BASENAME', plugin_basename( BHARATX_PAY_IN_3_FEATURE_FILE ) );
+define( 'BHARATX_PAY_IN_3_FEATURE_PLUGIN_BASENAME', plugin_basename( BHARATX_PAY_IN_3_FEATURE_PLUGIN_FILE ) );
 
 /**
  * Currently plugin dir.
  */
-define( 'BHARATX_PAY_IN_3_FEATURE_DIR', untrailingslashit( plugin_dir_path( __FILE__ ) ) );
+define( 'BHARATX_PAY_IN_3_FEATURE_PLUGIN_DIR', untrailingslashit( plugin_dir_path( __FILE__ ) ) );
 
 /**
  * The code that runs during plugin activation.
@@ -91,7 +91,7 @@ require plugin_dir_path( __FILE__ ) . 'includes/class-bharatx-pay-in-3-feature-p
  * then kicking off the plugin from this point in the file does
  * not affect the page life cycle.
  *
- * @since    1.0.0
+ * @since    1.2.0
  */
 function run_bharatx_pay_in_3_feature_plugin() {
 
@@ -106,15 +106,15 @@ function run_bharatx_pay_in_3_feature_plugin() {
 if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', get_option( 'active_plugins' ) ) ) ) {
 	run_bharatx_pay_in_3_feature_plugin();
 } else {
-	add_action( 'admin_notices', 'bharatx_pay_in_3_feature_installed_notice' );
+	add_action( 'admin_notices', 'bharatx_pay_in_3_feature_plugin_installed_notice' );
 }
 
 /**
  * Display Woocommerce Activation notice.
  */
-function bharatx_pay_in_3_feature_installed_notice() {     ?>
+function bharatx_pay_in_3_feature_plugin_installed_notice() {     ?>
 	<div class="error">
-	  <p><?php echo esc_html__( 'BharatX Pay-in-3 feature requires WooCommerce Plugin. Please install or activate WooCommerce', 'bharatx-pay-in-3-for-woocommerce' ); ?></p>
+	  <p><?php echo esc_html__( 'BharatX Pay-in-3 feature requires WooCommerce Plugin. Please install or activate WooCommerce', 'bharatx-pay-in-3-feature-plugin' ); ?></p>
 	</div>
 	<?php
 }
