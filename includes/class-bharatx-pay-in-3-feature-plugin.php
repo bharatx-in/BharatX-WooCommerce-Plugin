@@ -73,6 +73,7 @@ class Bharatx_Pay_In_3_Feature_Plugin {
 		} else {
 			$this->version = '1.2.0';
 		}
+		
 		if ( defined( 'BHARATX_PAY_IN_3_FEATURE_PLUGIN_SLUG' ) ) {
 			$this->plugin_name = BHARATX_PAY_IN_3_FEATURE_PLUGIN_SLUG;
 		} else {
