@@ -31,7 +31,7 @@ class Bharatx_Pay_In_3_Feature_Gateway extends WC_Payment_Gateway {
 		$this->id                 = BHARATX_PAY_IN_3_FEATURE_PLUGIN_SLUG; // payment gateway plugin ID.
 		$this->has_fields         = true; // in case you need a custom credit card form.
 		$this->method_title       = esc_html__( 'Bharatx', 'bharatx-pay-in-3-feature-plugin' );
-		$this->method_description = esc_html__( 'Pay in 3 easy installments', 'bharatx-pay-in-3-feature-plugin' );
+		$this->method_description = esc_html__( 'Pay in 3 easy installments' );
 		$this->log                = new WC_Logger();
 		$this->icon				  = 'https://d30flbpbaljuso.cloudfront.net/img/partner/logo/light/' . $this->get_option('merchant_partner_id');
 		$this->supports = array(
@@ -58,10 +58,6 @@ class Bharatx_Pay_In_3_Feature_Gateway extends WC_Payment_Gateway {
 		add_action( 'woocommerce_api_' . strtolower( 'BharatX_Pay_In_3_Feature_Gateway' ), array( $this, 'payment_callback' ) );
 
 		add_action( 'woocommerce_api_' . strtolower( 'BharatX_Pay_In_3_Feature_Gateway_Webhook' ), array( $this, 'webhook_callback' ) );
-
-		add_action('woocommerce_checkout_process', array($this, 'validatePhone'));
-		
-		
 	}
 
 	/**
@@ -92,6 +88,7 @@ class Bharatx_Pay_In_3_Feature_Gateway extends WC_Payment_Gateway {
 				'title' => esc_html__( 'Payment Method Title', 'bharatx-pay-in-3-feature-plugin' ),
 				'placeholder' => __( 'Optional', 'bharatx-pay-in-3-feature-plugin' ),
 				'type'  => 'text',
+				'default' => 'Pay in 3 by '
 			),
 			'color' => array(
 				'title' => esc_html__( 'Primary Color', 'bharatx-pay-in-3-feature-plugin' ),
@@ -228,7 +225,6 @@ class Bharatx_Pay_In_3_Feature_Gateway extends WC_Payment_Gateway {
 		$address1 = $order->get_shipping_address_1() .' ' . $order->get_shipping_address_2() . ' ' . $order->get_shipping_city() . $order->get_shipping_postcode();
 		$billing_add = $order->get_billing_address_1() . ' ' . $order->get_billing_address_2();
 	
-
 
 		$body = array(
 			'merchant_partner_id'                 => $this->merchant_partner_id,

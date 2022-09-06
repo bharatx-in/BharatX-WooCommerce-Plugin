@@ -101,7 +101,12 @@ class Bharatx_Pay_In_3_Feature_Plugin_Public {
 		$this->strings = array(
 			'price_string'               => 'Or 3 interest free payments of {{ amount }} with {{ logo }} {{ info_icon }}',
 			'payment_method_title'       => 'Pay In 3 via '   ,
-			'payment_method_description' => 'Pay In 3 Easy Installments',
+			'payment_method_description' => '<div>
+			<div class="bharatx-explanation-item"><div style="margin-right: 8px; padding-top: 2px;" ><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 28 28" fill="none"><path d="M20.0734 10.2587C19.6184 9.8031 18.8787 9.8031 18.4237 10.2587L13.4152 15.2666L11.3234 13.1753C10.8684 12.7198 10.1287 12.7198 9.67372 13.1753C9.21814 13.6309 9.21814 14.3694 9.67372 14.825L12.5904 17.7417C12.8179 17.9698 13.1166 18.0835 13.4152 18.0835C13.7139 18.0835 14.0126 17.9698 14.2401 17.7417L20.0734 11.9083C20.529 11.4528 20.529 10.7143 20.0734 10.2587Z" fill="#515151"></path><path d="M26.8333 12.8333C26.1893 12.8333 25.6667 13.356 25.6667 14C25.6667 20.433 20.433 25.6667 14 25.6667C7.567 25.6667 2.33333 20.433 2.33333 14C2.33333 7.567 7.567 2.33333 14 2.33333C17.1319 2.33333 20.0719 3.55717 22.2792 5.77967C22.7325 6.23758 23.4716 6.23992 23.9289 5.7855C24.3862 5.33167 24.3886 4.59317 23.9347 4.13583C21.2864 1.46883 17.7578 0 14 0C6.28017 0 0 6.28017 0 14C0 21.7198 6.28017 28 14 28C21.7198 28 28 21.7198 28 14C28 13.356 27.4773 12.8333 26.8333 12.8333Z" fill="#515151"></path></svg></div><div> Split payments into <strong>3 easy interest-free</strong> parts</div></div>
+			<div class="bharatx-explanation-item"><div style="margin-right: 8px; padding-top: 2px;" ><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 28 28" fill="none"><path d="M20.0734 10.2587C19.6184 9.8031 18.8787 9.8031 18.4237 10.2587L13.4152 15.2666L11.3234 13.1753C10.8684 12.7198 10.1287 12.7198 9.67372 13.1753C9.21814 13.6309 9.21814 14.3694 9.67372 14.825L12.5904 17.7417C12.8179 17.9698 13.1166 18.0835 13.4152 18.0835C13.7139 18.0835 14.0126 17.9698 14.2401 17.7417L20.0734 11.9083C20.529 11.4528 20.529 10.7143 20.0734 10.2587Z" fill="#515151"></path><path d="M26.8333 12.8333C26.1893 12.8333 25.6667 13.356 25.6667 14C25.6667 20.433 20.433 25.6667 14 25.6667C7.567 25.6667 2.33333 20.433 2.33333 14C2.33333 7.567 7.567 2.33333 14 2.33333C17.1319 2.33333 20.0719 3.55717 22.2792 5.77967C22.7325 6.23758 23.4716 6.23992 23.9289 5.7855C24.3862 5.33167 24.3886 4.59317 23.9347 4.13583C21.2864 1.46883 17.7578 0 14 0C6.28017 0 0 6.28017 0 14C0 21.7198 6.28017 28 14 28C21.7198 28 28 21.7198 28 14C28 13.356 27.4773 12.8333 26.8333 12.8333Z" fill="#515151"></path></svg></div><div> Get credit approved with <strong>zero documentation</strong></div></div>
+			<div class="bharatx-explanation-item"><div style="margin-right: 8px; padding-top: 2px;" ><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 28 28" fill="none"><path d="M20.0734 10.2587C19.6184 9.8031 18.8787 9.8031 18.4237 10.2587L13.4152 15.2666L11.3234 13.1753C10.8684 12.7198 10.1287 12.7198 9.67372 13.1753C9.21814 13.6309 9.21814 14.3694 9.67372 14.825L12.5904 17.7417C12.8179 17.9698 13.1166 18.0835 13.4152 18.0835C13.7139 18.0835 14.0126 17.9698 14.2401 17.7417L20.0734 11.9083C20.529 11.4528 20.529 10.7143 20.0734 10.2587Z" fill="#515151"></path><path d="M26.8333 12.8333C26.1893 12.8333 25.6667 13.356 25.6667 14C25.6667 20.433 20.433 25.6667 14 25.6667C7.567 25.6667 2.33333 20.433 2.33333 14C2.33333 7.567 7.567 2.33333 14 2.33333C17.1319 2.33333 20.0719 3.55717 22.2792 5.77967C22.7325 6.23758 23.4716 6.23992 23.9289 5.7855C24.3862 5.33167 24.3886 4.59317 23.9347 4.13583C21.2864 1.46883 17.7578 0 14 0C6.28017 0 0 6.28017 0 14C0 21.7198 6.28017 28 14 28C21.7198 28 28 21.7198 28 14C28 13.356 27.4773 12.8333 26.8333 12.8333Z" fill="#515151"></path></svg></div><div> Get <strong>timely reminders</strong> before the next payment date</div></div>
+			</div>
+			',
 			'varying_product_payment_description' => '3 interest free payments starting with {{ amount }} on {{ logo }} {{ info_icon }}'
 		);
 
@@ -129,6 +134,7 @@ class Bharatx_Pay_In_3_Feature_Plugin_Public {
 			add_action( 'woocommerce_review_order_after_order_total', array( $this, 'bharatx_price_text_checkout' ), 1 );
 
 			add_filter( 'woocommerce_gateway_title', array( $this, 'checkout_gateway_title' ), 10, 2 );
+			add_filter( 'woocommerce_gateway_icon', array( $this, 'checkout_gateway_icon' ), 10, 2 );
 			add_filter( 'woocommerce_gateway_description', array( $this, 'checkout_gateway_description' ), 10, 2 );
 		}
 	}
@@ -164,6 +170,7 @@ class Bharatx_Pay_In_3_Feature_Plugin_Public {
 	 */
 	public function enqueue_scripts() {
 		wp_enqueue_script( 'featherlight', plugin_dir_url( __FILE__ ) . 'js/featherlight.js', array( 'jquery' ), $this->version, false );
+		wp_enqueue_script( 'autoselect_bharatx', plugin_dir_url( __FILE__ ) . 'js/autoselect.js', array( 'jquery' ), $this->version, false );
 	}
 
 	/**
@@ -441,9 +448,6 @@ class Bharatx_Pay_In_3_Feature_Plugin_Public {
 	 * @return string $title Title.
 	 */
 	public function checkout_gateway_title( $title, $id ) {
-		if ( is_admin() ) {
-			return $title;
-		}
 		if ( BHARATX_PAY_IN_3_FEATURE_PLUGIN_SLUG === $id ) {
 			if( isset($this->settings['checkout_page_payment_method_title']) ) {
 				$title = $this->settings['checkout_page_payment_method_title'];
@@ -455,6 +459,28 @@ class Bharatx_Pay_In_3_Feature_Plugin_Public {
 	}
 
 	/**
+	 * Return payment gateway icon.
+	 *
+	 * @since    1.2.0
+	 * @param string $icon Icon.
+	 * @param string $id Gateway Id.
+	 * @return string $icon Icon.
+	 */
+	public function checkout_gateway_icon( $icon, $id ) {
+		if ( BHARATX_PAY_IN_3_FEATURE_PLUGIN_SLUG === $id ) {
+			$partner_id = "testPartnerId";
+
+			if ( isset($this->settings['merchant_partner_id']) ) {
+				$partner_id = $this->settings['merchant_partner_id'];
+			}
+
+			$url = "https://d30flbpbaljuso.cloudfront.net/img/partner/logo/light/" . $partner_id;
+			$icon = '<img src="' . $url . '" class="bharatx-merchant-checkout-gateway-logo" />' ;
+		}
+		return $icon;
+	}
+
+	/**
 	 * Return payment gateway description.
 	 *
 	 * @since    1.2.0
@@ -463,15 +489,8 @@ class Bharatx_Pay_In_3_Feature_Plugin_Public {
 	 * @return string $description description.
 	 */
 	public function checkout_gateway_description( $description, $id ) {
-		if ( is_admin() ) {
-			return $description;
-		}
 		if ( BHARATX_PAY_IN_3_FEATURE_PLUGIN_SLUG === $id ) {
-			if( $this->settings['checkout_page_payment_method_description'] ) {
-				$description = $this->settings['checkout_page_payment_method_description'];
-			} else {
-				$description = $this->strings['payment_method_description'];
-			}
+			$description = $this->strings['payment_method_description'];
 		}
 		return $description;
 	}

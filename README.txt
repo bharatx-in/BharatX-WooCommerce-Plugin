@@ -2,9 +2,9 @@
 Contributors: bharatxdev
 Tags: bharatx, payments, paylater, installments
 Requires at least: 5.3.2
-Version: 1.5.2
+Version: 1.5.3
 Tested up to: 5.9
-Stable tag: 1.5.2
+Stable tag: 1.5.3
 Requires PHP: 5.6
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -114,3 +114,10 @@ You can email jainam@bharatx.tech to get you sorted within 2 working hours.
 = 1.5.1 =
 
 * Fix: Occassionaly the payment method would result in 'Sorry, there was a problem with your payment' error
+
+= 1.5.3 =
+
+* Feat: auto choose pay in 3 option at checkout
+* Fix: logo size standardization
+* Feat: more descriptive payment gateway description
+* Fix: phone number validation happens for all payment gateways
