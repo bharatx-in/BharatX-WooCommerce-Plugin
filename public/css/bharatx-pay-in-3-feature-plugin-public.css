@@ -270,14 +270,15 @@ p.product-bharatx-text-note a{
 	text-decoration:none !important;
 	vertical-align:middle;
 }
+
 p.product-bharatx-text-note a span, p.product-bharatx-text-note a img {
 	vertical-align: middle;
 }
+
 p.product-bharatx-text-note a .product-bharatx-logo-text {
 	--tw-text-opacity: 1;
 	color: rgba(0, 209, 193, var(--tw-text-opacity)) !important;
 }
-
 
 body.woocommerce-checkout .entry-content .woocommerce-checkout-review-order .woocommerce-checkout-payment .wc_payment_methods>li>label {
 	display: inline-block !important;
@@ -299,4 +300,17 @@ body.woocommerce-checkout .entry-content .woocommerce-checkout-review-order .woo
 
 body.woocommerce-cart .cart_totals .bharatx-cart-text td{
 	text-align:right;
+}
+
+.bharatx-explanation-item {
+	display: flex;
+	align-content: center;
+}
+
+.bharatx-explanation-item svg {
+	margin-right: 10px;
+}
+
+img.bharatx-merchant-checkout-gateway-logo {
+	height: 20px !important; 
 }
