@@ -326,11 +326,6 @@ class Bharatx_Pay_In_3_Feature_Plugin_Public {
 		if ( null != $variation ) {
 			$price                = $variation->get_price();
 			$value['bharatx_price_text'] = $this->get_bharatx_price_text( $price, 'product' );
-			foreach($available_gateways as $gate){
-				if($gate == 'bharatx-pay-in-3-feature-plugin'){
-					unset($available_gateways['bharatx-pay-in-3-feature-plugin']);
-				}
-			}
 		}
 		return $value;
 	}
