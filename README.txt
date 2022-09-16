@@ -2,9 +2,9 @@
 Contributors: bharatxdev
 Tags: bharatx, payments, paylater, installments
 Requires at least: 5.3.2
-Version: 1.5.4
+Version: 1.5.5
 Tested up to: 5.9
-Stable tag: 1.5.4
+Stable tag: 1.5.5
 Requires PHP: 5.6
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -124,3 +124,6 @@ You can email jainam@bharatx.tech to get you sorted within 2 working hours.
 
 = 1.5.4 =
 * Fix: Invalid argument supplied for foreach()
+
+= 1.5.5 =
+* Fix: autoselect.js missing in public directory
