@@ -230,6 +230,10 @@ class Bharatx_Pay_In_3_Feature_Plugin_Public
 
 	public function remove_gateway_based_on_billing_total($available_gateways)
 	{
+		if (!WC()->cart) {
+			return $available_gateways;
+		}
+
 		$total = WC()->cart->get_total('edit');
 		$totals = intval($total);
 		if ($totals >= $this->max_limit) {
@@ -248,6 +252,10 @@ class Bharatx_Pay_In_3_Feature_Plugin_Public
 	 */
 	public function remove_gateway_based_on_category_id($available_gateways)
 	{
+		if (!WC()->cart) {
+			return $available_gateways;
+		}
+
 		$cart_product_id = array();
 		foreach (WC()->cart->get_cart() as $cart_item) {
 			$product_id = $cart_item['product_id'];
