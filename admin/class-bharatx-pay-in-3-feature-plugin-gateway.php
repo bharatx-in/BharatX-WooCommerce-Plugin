@@ -110,12 +110,13 @@ class Bharatx_Pay_In_3_Feature_Gateway extends WC_Payment_Gateway {
 				'label'   => __( 'Enable Logging', 'bharatx-pay-in-3-feature-plugin' ),
 				'default' => 'yes',
 			),
-			// 'hiding'                => array(
-			// 	'title'   => __( 'Promote Whitelabelled Pay in 3', 'bharatx-pay-in-3-feature-plugin' ),
-			// 	'type'    => 'checkbox',
-			// 	'label'   => __( 'Check to enable it', 'bharatx-pay-in-3-feature-plugin' ),
-			// 	'default' => 'yes',
-			// ),
+			'pdp_popup_logo' => array(
+				'title' => esc_html__('PDP Popup Logo', 'bharatx-pay-in-3-feature-plugin'),
+				'placeholder' => __('https://mywebsite.com/assets/pdp.png', 'bharatx-pay-in-3-feature-plugin'),
+				'label' => __('PDP Popup Logo', 'bharatx-pay-in-3-feature-plugin'),
+				'description' => esc_html__('URL to override the preconfigured PDP logo'),
+				'default' => ''
+			)
 		);
 	}
 

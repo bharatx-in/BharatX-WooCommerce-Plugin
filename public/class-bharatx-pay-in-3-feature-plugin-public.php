@@ -404,7 +404,13 @@ class Bharatx_Pay_In_3_Feature_Plugin_Public
 			'decimals' => 2,
 		);
 		$part            = wc_price($amount_in_rs, $args);
-		$image           = '<img class="bharatx-brand-logo" src="' . 'https://d30flbpbaljuso.cloudfront.net/img/partner/logo/light/' .  esc_html($this->settings['merchant_partner_id']) . '"/>';
+
+		$pdp_image_url = 'https://d30flbpbaljuso.cloudfront.net/img/partner/logo/light/' .  esc_html($this->settings['merchant_partner_id']);
+		if (isset($this->settings["pdp_popup_logo"]) && $this->settings["pdp_popup_logo"] && "" != $this->settings["pdp_popup_logo"]) {
+			$pdp_image_url = $this->settings["pdp_popup_logo"];
+		}
+
+		$image           = '<img class="bharatx-brand-logo" src="' . $pdp_image_url . '"/>';
 		$info_icon       = '<img src="' . esc_html(plugin_dir_url(__FILE__) . 'images/info.svg') . '"/>';
 
 		$featherlight = 'data-featherlight="' . 'https://d30flbpbaljuso.cloudfront.net/img/partner/woocommerce/popups/' . $this->settings['merchant_partner_id'] .  '.png' . '"';
