@@ -113,6 +113,8 @@ class Bharatx_Pay_In_3_Feature_Plugin_Public
 			'varying_product_payment_description' => '3 interest free payments starting with {{ amount }} on {{ logo }} {{ info_icon }}'
 		);
 
+
+
 		add_action('init', array($this, 'init'));
 	}
 
@@ -122,6 +124,32 @@ class Bharatx_Pay_In_3_Feature_Plugin_Public
 		$available_payment_methods = WC()->payment_gateways->get_available_payment_gateways();
 		if (isset($available_payment_methods['bharatx-pay-in-3-feature-plugin'])) {
 			$this->settings = $available_payment_methods['bharatx-pay-in-3-feature-plugin']->settings;
+
+			try {
+				$response = wp_remote_get("https://web-v2.bharatx.tech/api/merchant/configuration", array(
+					"headers" => array(
+						"authorization" => "Basic " . base64_encode(
+							$this->settings["merchant_partner_id"] . ":" . $this->settings["merchant_private_key"]
+							)
+					)
+				));
+
+				if (is_a($response, "WP_Error")) {
+					throw new Exception($response -> get_error_message() );
+				}
+
+				if ($response["response"]["code"] != 200) {
+					throw new Exception($response["body"]);
+				}
+
+				$configuration = json_decode($response["body"]);
+				$this->max_limit = $configuration->maxOrderAmount/100;
+			} catch (Exception $e) {
+				$errorMessage = "error applying bharatx partner configuration: " . $e->getMessage();
+
+				error_log($errorMessage, 0);
+				do_action("qm/error", $errorMessage);
+			}
 
 			add_filter('woocommerce_available_payment_gateways', array($this, 'remove_gateway_based_on_billing_total'), 10, 2);
 			add_filter('woocommerce_available_payment_gateways', array($this, 'remove_gateway_based_on_billing_country'), 10, 2);
@@ -194,27 +222,21 @@ class Bharatx_Pay_In_3_Feature_Plugin_Public
 			if (!in_array($country_code, $this->supported_countries, true)) {
 				unset($available_gateways['bharatx-pay-in-3-feature-plugin']);
 				unset($this->strings['price_string']);
+				unset($this->strings['price_string_for_checkout']);
 			}
 		}
 		return $available_gateways;
 	}
 
-
-
 	public function remove_gateway_based_on_billing_total($available_gateways)
 	{
-		if (is_admin()) {
-			return $available_gateways;
-		}
-		if (!WC()->customer) {
-			return $available_gateways;
-		}
 		$total = WC()->cart->get_total('edit');
 		$totals = intval($total);
 		if ($totals >= $this->max_limit) {
 			if (isset($available_gateways['bharatx-pay-in-3-feature-plugin'])) {
 				unset($available_gateways['bharatx-pay-in-3-feature-plugin']);
 				unset($this->strings['price_string']);
+				unset($this->strings['price_string_for_checkout']);
 			}
 		}
 		return $available_gateways;
@@ -226,24 +248,21 @@ class Bharatx_Pay_In_3_Feature_Plugin_Public
 	 */
 	public function remove_gateway_based_on_category_id($available_gateways)
 	{
-		if (is_admin()) {
-			return $available_gateways;
-		}
-		if (!WC()->customer) {
-			return $available_gateways;
-		}
 		$cart_product_id = array();
 		foreach (WC()->cart->get_cart() as $cart_item) {
 			$product_id = $cart_item['product_id'];
 			array_push($cart_product_id, $product_id);
 		}
+
 		$category_ids = $this->settings['category_ids'];
 		$str		  = preg_split("/\,/", $category_ids);
 		$result 	  = array_diff($str, $cart_product_id);
+
 		if (count($result) < count($str)) {
 			if (isset($available_gateways['bharatx-pay-in-3-feature-plugin'])) {
 				unset($available_gateways['bharatx-pay-in-3-feature-plugin']);
 				unset($this->strings['price_string']);
+				unset($this->strings['price_string_for_checkout']);
 			}
 		}
 		return $available_gateways;
@@ -267,7 +286,7 @@ class Bharatx_Pay_In_3_Feature_Plugin_Public
 			$price = $product->get_price();
 			$actual_price = intval($price);
 			$id = $product->get_id();
-			if ($actual_price < $this->max_limit && !in_array($id, $str)) {
+			if ($actual_price <= $this->max_limit && !in_array($id, $str)) {
 				echo wp_kses_post($this->get_bharatx_price_text($price, 'product'));
 			}
 		}
@@ -277,46 +296,26 @@ class Bharatx_Pay_In_3_Feature_Plugin_Public
 	{
 		global $product;
 		if ('variable' === $product->get_type()) {
-			$price = $product->get_price();
-			$prices = $product->get_variation_prices();
-			if (!empty($prices)) {
-				$min_price     = current($prices['price']);
-				$max_price     = end($prices['price']);
-				$min_reg_price = current($prices['regular_price']);
-				$max_reg_price = end($prices['regular_price']);
-
-				if ($min_price != $max_price || $min_reg_price != $max_reg_price) {
-					echo '<div class="bharatx-price-variation-default-text">';
-					echo wp_kses_post($this->get_bharatx_price_text($price, 'product', 'variation'));
-					echo '</div>';
-				} else {
-					echo '<div class="bharatx-price-variation-default-text">';
-					echo wp_kses_post($this->get_bharatx_price_text($price, 'product'));
-					echo '</div>';
-				}
+				echo '<div class="bharatx-price-variation-default-text"></div>';
 ?>
 				<script type="text/javascript">
 					jQuery(document).ready(function($) {
 						if ($(".single_variation_wrap").length > 0) {
-							var $text = '';
-							if ($('.bharatx-price-variation-default-text').length > 0) {
-								var $text = $('.bharatx-price-variation-default-text').html();
-							}
 							$(".single_variation_wrap").on("show_variation", function(event, variation) {
 								if ($('.bharatx-price-variation-default-text').length > 0) {
 									$('.bharatx-price-variation-default-text').html(variation.bharatx_price_text);
 								}
 							});
+
 							$(".single_variation_wrap").on("hide_variation", function(event, variation) {
 								if ($('.bharatx-price-variation-default-text').length > 0) {
-									$('.bharatx-price-variation-default-text').html($text);
+									$('.bharatx-price-variation-default-text').html("");
 								}
 							});
 						}
 					});
 				</script>
 		<?php
-			}
 		}
 	}
 
@@ -384,38 +383,25 @@ class Bharatx_Pay_In_3_Feature_Plugin_Public
 	 */
 	public function get_bharatx_price_text($price, $page, $type = 'simple')
 	{
+		if ($price > $this->max_limit) {
+			return "";
+		}
+
 		$featherlight    = '';
 		$amount_in_paise =  round($price, 2);
 		$div             = (float) ($amount_in_paise / 3);
 		$amount_in_rs    = round($div, 2);
 		$part            = wc_price($amount_in_rs);
 		$args            = array(
-			'decimals'           => 2,
+			'decimals' => 2,
 		);
 		$part            = wc_price($amount_in_rs, $args);
 		$image           = '<img class="bharatx-brand-logo" src="' . 'https://d30flbpbaljuso.cloudfront.net/img/partner/logo/light/' .  esc_html($this->settings['merchant_partner_id']) . '"/>';
-
-
 		$info_icon       = '<img src="' . esc_html(plugin_dir_url(__FILE__) . 'images/info.svg') . '"/>';
-
-
-
-	?>
-		<script type="text/javascript">
-			jQuery(document).ready(function($) {
-				var text = $('.product-bharatx-text-note').html();
-				if (jQuery('.product_title').length && jQuery('.price').length) {
-					$(".bharatx-price-variation-default-text").remove();
-					$(".product-bharatx-text-note").remove();
-					$(".product_title").append('<div class="bharatx-price-variation-default-text"> <p class="product-bharatx-text-note">' + text + '</p> </div>');
-				}
-			});
-		</script>
-		<?php
-
 
 		$featherlight = 'data-featherlight="' . 'https://d30flbpbaljuso.cloudfront.net/img/partner/woocommerce/popups/' . $this->settings['merchant_partner_id'] .  '.png' . '"';
 		$interstitial_options = ' data-page="' . $page . '" ';
+
 		if (is_singular('product')) {
 			$object                = get_queried_object();
 			$product_id            = $object->ID;
@@ -425,20 +411,23 @@ class Bharatx_Pay_In_3_Feature_Plugin_Public
 		}
 
 		ob_start();
+
 		if ($type == 'simple') {
-			$string       = $this->strings['price_string'];
+			$string = $this->strings['price_string'];
 			if ($page == 'checkout') {
 				$string = $this->strings['price_string_for_checkout'];
 			}
 		} else {
-			$string       = $this->strings['varying_product_payment_description'];
+			$string = $this->strings['varying_product_payment_description'];
 		}
+
 		$placeholders = array(
 			'{{ amount }}'   => $part,
 			'{{ logo }}'     => sprintf('<a class="bharatx-popup-link" href="#" %s %s><span class="product-bharatx-logo-text">%s</span></a>', $interstitial_options, $featherlight, $image),
 			'{{ info_icon }}' => sprintf('<a class="bharatx-popup-link" href="#" %s %s>%s</a>', $interstitial_options, $featherlight, $info_icon),
 		);
-		$string       = str_replace(array_keys($placeholders), $placeholders, $string);
+
+		$string = str_replace(array_keys($placeholders), $placeholders, $string);
 		?>
 		<p class="product-bharatx-text-note"><?php echo wp_kses_post($string); ?></p>
 <?php
