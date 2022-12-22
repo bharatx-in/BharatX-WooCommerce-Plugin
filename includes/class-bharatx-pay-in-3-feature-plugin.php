@@ -246,4 +246,49 @@ class Bharatx_Pay_In_3_Feature_Plugin {
 		return array_merge( $action_links, $links );
 	}
 
+	/**
+	 * Get the transactions table name managed by BharatX
+	 * 
+	 * @since 1.6.0
+	 */
+	public static function get_transactions_table_name() {
+		global $wpdb;
+
+		$table_name = $wpdb->prefix . 'bharatx_pay_in_3_transactions';
+		return $table_name;
+	}
+
+	/**
+	 * Set the transaction id for the given order key
+	 * 
+	 * @since 1.6.0
+	 */
+	public static function set_bharatx_transaction_id_for_order($orderKey, $transactionId) {
+		global $wpdb;
+
+		$table_name = Bharatx_Pay_In_3_Feature_Plugin::get_transactions_table_name();
+		$wpdb -> query("
+			INSERT INTO $table_name (orderKey, bharatxTransactionId) VALUES('$orderKey', '$transactionId') 
+			ON DUPLICATE KEY UPDATE  bharatxTransactionId = '$transactionId'
+		");
+	}
+
+	/**
+	 * Get the transaction id for the given order key
+	 * 
+	 * @since 1.6.0
+	 */
+	public static function get_bharatx_transaction_id_for_order($orderKey) {
+		global $wpdb;
+
+		$table_name = Bharatx_Pay_In_3_Feature_Plugin::get_transactions_table_name();
+		$transactionId = $wpdb->get_var( "
+			SELECT 
+				bharatxTransactionId
+			FROM  $table_name
+			where orderKey = '$orderKey' ;
+		");
+
+		return $transactionId;
+	}
 }

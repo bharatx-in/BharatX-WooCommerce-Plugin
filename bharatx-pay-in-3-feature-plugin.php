@@ -16,7 +16,7 @@
  * Plugin Name:       BharatX Pay In 3 
  * Plugin URI:        https://wordpress.org/plugins/bharatx-pay-in-3/
  * Description:       Split orders into 3 interest-free payments
- * Version:           1.5.9
+ * Version:           1.6.0
  * Author:            BharatX
  * Author URI:        https://www.bharatx.tech
  * License:           GPL-2.0+
@@ -35,7 +35,7 @@ if ( ! defined( 'WPINC' ) ) {
  * Start at version 1.2.0 and use SemVer - https://semver.org
  * Rename this for your plugin and update it as you release new versions.
  */
-define( 'BHARATX_PAY_IN_3_FEATURE_PLUGIN_VERSION', '1.5.9' );
+define( 'BHARATX_PAY_IN_3_FEATURE_PLUGIN_VERSION', '1.6.0' );
 
 /**
  * Currently plugin slug.
@@ -75,8 +75,18 @@ function deactivate_bharatx_pay_in_3_feature_plugin() {
 	Bharatx_Pay_In_3_Feature_Plugin_Deactivator::deactivate();
 }
 
+/**
+ * The code that runs during plugin uninstallation.
+ * This action is documented in includes/class-bharatx pay in 3 feature plugin-deactivator.php
+ */
+function uninstall_bharatx_pay_in_3_feature_plugin() {
+	require_once plugin_dir_path( __FILE__ ) . 'includes/class-bharatx-pay-in-3-feature-plugin-deactivator.php';
+	Bharatx_Pay_In_3_Feature_Plugin_Deactivator::uninstall();
+}
+
 register_activation_hook( __FILE__, 'activate_bharatx_pay_in_3_feature_plugin' );
 register_deactivation_hook( __FILE__, 'deactivate_bharatx_pay_in_3_feature_plugin' );
+register_uninstall_hook( __FILE__, 'uninstall_bharatx_pay_in_3_feature_plugin' );
 
 /**
  * The core plugin class that is used to define internationalization,

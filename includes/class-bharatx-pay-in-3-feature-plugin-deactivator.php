@@ -23,14 +23,27 @@
 class Bharatx_Pay_In_3_Feature_Plugin_Deactivator {
 
 	/**
-	 * Short Description. (use period)
-	 *
-	 * Long Description.
+	 * Nothing to do
 	 *
 	 * @since    1.2.0
 	 */
 	public static function deactivate() {
 
-	}
+	 }
 
+	/**
+	 * Removes database data for BharatX Pay In 3
+	 *
+	 * @since    1.6.0
+	 */
+	public static function uninstall() {
+		require_once plugin_dir_path( __FILE__ ) . 'class-bharatx-pay-in-3-feature-plugin.php';
+		$tableName = Bharatx_Pay_In_3_Feature_Plugin::get_transactions_table_name();
+
+		global $wpdb;
+
+		$wpdb->query("
+			drop table if exists $tableName;
+		");
+	}
 }

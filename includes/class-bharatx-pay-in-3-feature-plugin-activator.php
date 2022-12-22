@@ -30,7 +30,16 @@ class Bharatx_Pay_In_3_Feature_Plugin_Activator {
 	 * @since    1.2.0
 	 */
 	public static function activate() {
+		require_once plugin_dir_path( __FILE__ ) . 'class-bharatx-pay-in-3-feature-plugin.php';
+		$tableName = Bharatx_Pay_In_3_Feature_Plugin::get_transactions_table_name();
 
+		global $wpdb;
+
+		$wpdb->query("
+			create table if not exists $tableName (
+				orderKey varchar(255) primary key,
+				bharatxTransactionId varchar(255) not null
+			);
+		");
 	}
-
 }

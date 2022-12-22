@@ -2,9 +2,9 @@
 Contributors: bharatxdev
 Tags: bharatx, payments, paylater, installments
 Requires at least: 5.3.2
-Version: 1.5.9
+Version: 1.6.0
 Tested up to: 5.9
-Stable tag: 1.5.9
+Stable tag: 1.6.0
 Requires PHP: 5.6
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -139,3 +139,8 @@ You can email jainam@bharatx.tech to get you sorted within 2 working hours.
 
 = 1.5.9 =
 * Feat: allow PDP logo override 
+
+= 1.6.0 =
+* Fix: security bugs
+* Feat: skipped receipt page before redirecting to BharatX flow
+* Better logs for debugging purposes
