@@ -14,6 +14,229 @@
  */
 
 /**
+ * BharatX API Client Class
+ *
+ * Utility class to perform BharatX API calls
+ * 
+ * @since 1.6.1
+ */
+class Bharatx_Api_Client {
+	private  $partnerId;
+	private $apiKey;
+	private $version = null;
+
+	public function __construct($partnerId, $apiKey, $version = null) {
+		$this -> partnerId = $partnerId;
+		$this -> apiKey = $apiKey;	
+
+		$this -> version = $version;
+	}
+
+	public function get_bharatx_auth_header() {
+		$str = $this->partnerId . ":" . $this->apiKey;
+		return "Basic " . base64_encode($str);
+	}
+
+	private function format_response($response, $version) {
+		$response_code = wp_remote_retrieve_response_code($response);
+		$response_body = wp_remote_retrieve_body($response);
+
+		if ($response_code >= 200 && $response_code < 400) {
+			$response_body = json_decode($response_body);
+		}
+
+		return array(
+			"status_code" => $response_code,
+			"data" => $response_body,
+			"version" => $version
+		);
+	}
+
+	private function get_version() {
+		if (!is_null($this->version)) {
+			return $this->version;
+		}
+
+		$response = $this->get_merchant_configuration();
+		if ($response["status_code"] == 200) {
+			$this->version = $response["data"]->version;
+			return $this->version;
+		} 
+
+		return 1;
+	}
+
+	public function get_merchant_configuration() {
+		$response = wp_remote_get("https://web-v2.bharatx.tech/api/merchant/configuration", array(
+			'headers' => array(
+				"content-type" => "application/json",
+				"authorization" => $this->get_bharatx_auth_header(),
+			),
+			"timeout" => 60,
+		));
+
+		return $this->format_response($response, 2);
+	}
+
+	private function generate_auth_signature($payload, $endpoint) {
+		$content = $payload . $endpoint . $this->apiKey;
+		$shasignature = hash('sha256', $content, true);
+		return base64_encode($shasignature);
+	}
+
+	private function sanitize_amount($amount) {
+		return floor($amount * 100);
+	}
+
+	public function refund_transaction($transactionId, $amount = null, $reason = null) {
+		$version = $this->get_version();
+		if (is_null($amount)) {
+			$amount = 0;
+		}
+
+		$amount = $this->sanitize_amount($amount);
+
+		$url = "https://web-v2.bharatx.tech/api/merchant/transaction/$transactionId/refund";
+		if ($version == 1) {
+			$url = "https://web.bharatx.tech/api/refund";
+		}
+
+		$body = array();
+		if ($version == 1) {
+			$body = array(
+				"transactionId" => $transactionId,
+			);
+
+			if ($amount != 0) {
+				$body["amount"] = $amount;
+			}
+		} else {
+			$body = array (
+				"refund" => array(
+					"amount" => $amount,
+				),
+			);
+		}
+
+		$json_body = json_encode($body);
+		$headers = array(
+			"content-type" => "application/json",
+		);
+
+		if ($version == 1) {
+			$headers["x-partner-id"] = $this->partnerId;
+			$headers["x-signature"] = $this->generate_auth_signature($json_body, "/api/refund");
+		} else {
+			$headers["authorization"] = $this->get_bharatx_auth_header();
+		}
+
+		$response = wp_remote_post($url, array(
+			"headers" => $headers,
+			"body" => $json_body,
+			"timeout" => 60,
+		));
+
+		return $this->format_response($response, $version);
+	}
+
+	public function get_transaction($transactionId) {
+		$version = $this->get_version();
+
+		$url = "https://web-v2.bharatx.tech/api/merchant/transaction/$transactionId";
+		if ($version == 1) {
+			$url = "https://web.bharatx.tech/api/transaction/status?id=$transactionId";
+		}
+
+		$headers = array();
+		if ($version == 1) {
+			$headers["x-partner-id"] = $this->partnerId;
+		} else {
+			$headers["authorization"] = $this->get_bharatx_auth_header();
+		}
+
+		$response = wp_remote_get($url, array(
+			"headers" => $headers,
+			"timeout" => 60,
+		));
+
+		return $this->format_response($response, $version);
+	}
+
+	public function create_transaction(
+		$transactionId,
+		$amount,
+		$user,
+		$notes,
+		$redirectUrl,
+		$cancelUrl,
+		$webhookUrl,
+		$logoOverride,
+		$colorOverride
+	) {
+		$version = $this->get_version();
+		$amount = $this->sanitize_amount($amount);
+
+		$url = "https://web-v2.bharatx.tech/api/merchant/transaction";
+		if ($version == 1) {
+			$url = "https://web.bharatx.tech/api/transaction";
+		}
+
+		$body = array();
+		if ($version == 1) {
+			$body = array(
+				'id'              => $transactionId,
+				'amount' 	      => $amount,
+				'user'			  => $user,
+				'notes'			  => $notes,
+				'redirect'		  => array(
+					'url'			 => $redirectUrl,
+					'logoOverride'	 => $logoOverride,
+					'colorOverride'  => $colorOverride,
+				)
+			);
+		} else {
+			$body = array(
+				"transaction" => array (
+					"id" => $transactionId,
+					"amount" => $amount,
+					"notes" => $notes,
+				),
+				"createConfiguration" => array(
+					"successRedirectUrl" => $redirectUrl,
+					"failureRedirectUrl" => $redirectUrl,
+					"cancelRedirectUrl" => $cancelUrl,
+					"webhookUrl" => $webhookUrl,
+					"logoOverride" => $logoOverride,
+					"colorOverride" => $colorOverride,
+				),
+				"user" => $user,
+			);
+		}
+
+		$json_body = json_encode($body);
+		$headers = array(
+			"content-type" => "application/json",
+		);
+
+		if ($version == 1) {
+			$headers["x-partner-id"] = $this->partnerId;
+			$headers["x-signature"] = $this->generate_auth_signature($json_body, "/api/transaction");
+		} else {
+			$headers["authorization"] = $this->get_bharatx_auth_header();
+		}
+
+		$response = wp_remote_post($url, array(
+			"headers" => $headers,
+			"body" => $json_body,
+			"timeout" => 60,
+		));
+
+		return $this->format_response($response, $version);
+	}
+}
+
+
+/**
  * The core plugin class.
  *
  * This is used to define internationalization, admin-specific hooks, and
@@ -290,5 +513,9 @@ class Bharatx_Pay_In_3_Feature_Plugin {
 		");
 
 		return $transactionId;
+	}
+
+	public static function get_bharatx_merchant_configuration() {
+
 	}
 }

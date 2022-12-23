@@ -213,7 +213,6 @@ class Bharatx_Pay_In_3_Feature_Gateway extends WC_Payment_Gateway {
             	$phone = '+91' . $phone;
                 break;
             
-            
             case 11:
             	$phone = '+91' . substr($phone,1);
                 break;
@@ -223,23 +222,7 @@ class Bharatx_Pay_In_3_Feature_Gateway extends WC_Payment_Gateway {
                 break;
         }
 
-		$order_data = $order->get_data();
-		$order_date_created = $order_data['date_created']->date('Y-m-d H:i:s');
-		$address1 = $order->get_shipping_address_1() .' ' . $order->get_shipping_address_2() . ' ' . $order->get_shipping_city() . $order->get_shipping_postcode();
-		$billing_add = $order->get_billing_address_1() . ' ' . $order->get_billing_address_2();
-	
-
-		$body = array(
-			'merchant_partner_id'                 => $this->merchant_partner_id,
-			'transaction_status_redirection_url'  => get_site_url() . '/?wc-api=Bharatx_Pay_In_3_Feature_Gateway&key=' . $order->get_order_key(),
-		    'transaction_status_webhook_url'      => get_site_url() . '/?wc-api=Bharatx_Pay_In_3_Feature_Gateway_Webhook&key=' . $order->get_order_key(),
-			'order_id'                            => (string) $uniq_order_id,
-			'amount_in_paise'                     => (int) ( $order->calculate_totals() * 100 ),
-			'journey_id'                          => WC()->session->get( 'bharatx_journey_id' ),
-		);
-
-
-		$body['items'] = array();
+		$items = array();
 		if ( count( $order->get_items() ) ) {
 			foreach ( $order->get_items() as $item ) {
 				if ( $item['variation_id'] ) {
@@ -269,104 +252,85 @@ class Bharatx_Pay_In_3_Feature_Gateway extends WC_Payment_Gateway {
 						'height' => $product->get_height(),
 					),
 				);
-				array_push( $body['items'],$item_data);
+				array_push( $items, $item_data);
 			}
 		}
 
-		$body['user'] = array(
-			'first_name'   => $order->get_billing_first_name(),
-			'last_name'    => $order->get_billing_last_name(),
-			'phone_number' => $order->get_billing_phone(),
-			'email'        => $order->get_billing_email(),
+		$user = array(
+			'name'     		  => $order->get_billing_first_name() . ' ' . $order->get_billing_last_name(),
+			'phoneNumber'     => $phone,
+			'email'           => $order->get_billing_email(),
 		);
 
-		$body['billing_address'] = array(
-			'line1'   => $order->get_billing_address_1(),
-			'line2'   => $order->get_billing_address_2(),
-			'city'    => $order->get_billing_city(),
-			'pincode' => $order->get_billing_postcode(),
-		);
-
-		$body['user_details'] = array(
-			'id'              => $transaction_id,
-			'amount' 	      => $body['amount_in_paise'],
-			'user'			  => array(
-				'name'     		  => $order->get_billing_first_name() . ' ' . $order->get_billing_last_name(),
-				'phoneNumber'     => $phone,
-				'email'           => $order->get_billing_email(),
+		$notes = array(
+			'woocommerceOrderId' => $uniq_order_id,
+			'shippingAddress'	 => array(
+				'line1'   => $order->get_shipping_address_1(),
+				'line2'   => $order->get_shipping_address_2(),
+				'city'    => $order->get_shipping_city(),
+				'pincode' => $order->get_shipping_postcode(),
 			),
-			'notes'			  => array(
-				'woocommerceOrderId' => $uniq_order_id,
-				'shippingAddress'	 => $address1,
-				'billingAddress'	 => $billing_add,
-				'items'				 => $body['items'],
-				'orderKey'		     => $order->get_order_key(),
-				'webhook_url'	     => get_site_url() . '/?wc-api=Bharatx_Pay_In_3_Feature_Gateway_Webhook&key=' . $order->get_order_key(),
-				'orderId' 			 => $order_id,
-				),
-			'redirect'		  => array(
-				'url'			 => $body['transaction_status_redirection_url'],
-				'logoOverride'	 => $this->icon,
-				'colorOverride'  => $this->color,
-			)
+			'billingAddress'	 => array(
+				'line1'   => $order->get_billing_address_1(),
+				'line2'   => $order->get_billing_address_2(),
+				'city'    => $order->get_billing_city(),
+				'pincode' => $order->get_billing_postcode(),
+			),
+			'items'				 => $items,
+			'orderKey'		     => $order->get_order_key(),
+			'webhook_url'	     => get_site_url() . '/?wc-api=Bharatx_Pay_In_3_Feature_Gateway_Webhook&key=' . $order->get_order_key(),
+			'orderId' 			 => $order_id,
+			'thank_you_page' => $this->get_return_url($order),
 		);
+
+		$amount = $order->calculate_totals();
+		$webhookUrl = get_site_url() . '/?wc-api=Bharatx_Pay_In_3_Feature_Gateway_Webhook&key=' . $order->get_order_key();
+		$redirectUrl = get_site_url() . '/?wc-api=Bharatx_Pay_In_3_Feature_Gateway&key=' . $order->get_order_key();
+		$logoOverride = $this->icon; 
+		$colorOverride = $this->color; 
+		$cancelUrl = wc_get_checkout_url();
 
 		$order_key = $order->get_order_key();
 
-		if ( ! empty( $order->get_billing_address_2() ) ) {
-			$body['billing_address']['line1'] = $order->get_billing_address_2();
-			$body['billing_address']['line2'] = $order->get_billing_address_1();
-		}
-
-		$body['shipping_address'] = array(
-			'line1'   => $order->get_shipping_address_1(),
-			'line2'   => $order->get_shipping_address_2(),
-			'city'    => $order->get_shipping_city(),
-			'pincode' => $order->get_shipping_postcode(),
-		);
-
 		$this->log( "INFO: creating bharatx transaction for order/$order_id/$order_key" );
-
-		$php_string = json_encode($body['user_details'] );
-		$msg_hash = $php_string . '/api/transaction' . $this->merchant_private_key;
-		$shasignature = hash('sha256',$msg_hash,true);
-		$signature = base64_encode($shasignature);
-
-		$args                 = array(
-			'method'      => "POST",
-			'headers'     => array(
-				'Content-Type'  => 'application/json',
-				'X-Partner-Id'  => $this->merchant_partner_id,
-				'X-Signature'	=> $signature,
-				'Expect' => '',
-			),
-			'body' => $php_string,
-			'blocking' => true,
-			'timeout' => 60
+		$api_client = new Bharatx_Api_Client($this->merchant_partner_id, $this->merchant_private_key);
+		$response = $api_client -> create_transaction(
+			$transaction_id,
+			$amount,
+			$user,
+			$notes,
+			$redirectUrl,
+			$cancelUrl,
+			$webhookUrl,
+			$logoOverride,
+			$colorOverride
 		);
 
-		$initiate_url         = $this->get_initiate_url();
-		$response             = wp_remote_post( $initiate_url, $args);
-		$encode_response_body = wp_remote_retrieve_body( $response );
-		$response_code        = wp_remote_retrieve_response_code( $response );
-
+		$response_code = $response["status_code"];
 		$this->log("INFO: received statusCode/$response_code for creating transaction/$transaction_id for order/$order_id/$order_key");
 
 		if ( 200 == $response_code ) {
-			$response_body = json_decode($encode_response_body);
+			$response_body = $response["data"];
+
 			$order->add_order_note( esc_html__( 'Transaction Id: ' . $transaction_id , 'Bharatx_Pay_In_3_Feature_Plugin' ) );
 
 			Bharatx_Pay_In_3_Feature_Plugin::set_bharatx_transaction_id_for_order($order_key, $transaction_id);
 			$this -> log("INFO: associated transaction/$transaction_id with order/$order_id/$order_key");
-
-			update_post_meta( $order->get_id(), '_bharatx_redirect_url', $response_body->redirectUrl );
-
-			return array(
-				'result'   => 'success',
-				"redirect" => $response_body->redirectUrl ,
-			);
+			
+			if ($response["version"] == 1) {
+				return array(
+					'result'   => 'success',
+					"redirect" => $response_body->redirectUrl ,
+				);
+			} else {
+				return array(
+					"result" => "success",
+					"redirect" => $response_body->transaction->url,
+				);
+			}
 		} else{
-			$this -> log("ERROR: error occured while creating BharatX transaction for order/$order_id/$order_key: $encode_response_body");
+			$data = $response["data"];
+			$this -> log("ERROR: error occured while creating BharatX transaction for order/$order_id/$order_key: $data");
 
 			$order->add_order_note( esc_html__( 'Unable to generate the transaction ID. Payment couldn\'t proceed.', 'bharatx-pay-in-3-feature-plugin' ) );
 			wc_add_notice( esc_html__( 'Sorry, there was a problem with your payment.', 'bharatx-pay-in-3-feature-plugin' ), 'error' );
@@ -404,33 +368,6 @@ class Bharatx_Pay_In_3_Feature_Gateway extends WC_Payment_Gateway {
 			$this->log = new WC_Logger();
 		}
 		$this->log->add( 'BharatX', $message );
-	}
-
-	/**
-	 * Dump API Actions.
-	 *
-	 * @since    1.2.0
-	 * @param string $url URL.
-	 * @param Array  $request Request.
-	 * @param Array  $response Response.
-	 * @param Int    $status_code Status Code.
-	 */
-	public function dump_api_actions( $url, $request = null, $response = null, $status_code = null ) {
-		ob_start();
-		echo esc_url( $url );
-		echo '<br>';
-		echo 'Request Body : ';
-		echo '<br>';
-		print_r( $request );
-		echo '<br>';
-		echo 'Response Body : ';
-		echo '<br>';
-		print_r( $response );
-		echo '<br>';
-		echo 'Status Code : ';
-		echo esc_html( $status_code );
-		$data = ob_get_clean();
-		$this->log( $data );
 	}
 
 	/**
@@ -484,28 +421,23 @@ class Bharatx_Pay_In_3_Feature_Gateway extends WC_Payment_Gateway {
 			}
 
 			$this -> log("INFO: fetching latest status of transactionId/$transaction_id");
+			$api_client = new Bharatx_Api_Client($this->merchant_partner_id, $this->merchant_private_key);
+			$response = $api_client->get_transaction($transaction_id);
 
-			$url = $this->get_transaction_status_url( $transaction_id );
-			$args = array(
-				'headers'     => array(
-					'Content-Type'  => 'application/json',
-					'X-Partner-Id' => $this->merchant_partner_id,
-				),
-				"timeout" => 60
-			);
-			$response = wp_remote_get( $url, $args);
-			$encode_response_body = wp_remote_retrieve_body( $response );
-			$response_code = wp_remote_retrieve_response_code( $response );
-
+			$response_code = $response["status_code"];
 			$this->log("INFO: got statusCode/$response_code for get transaction: transactionId/$transaction_id for order/$order_id/$order_key");
+
 			if (200 == $response_code) {
-				$response_body  = json_decode( $encode_response_body );
-				$status         = $response_body->status;
+				$response_body  = $response["data"];
+				$status = null;
+				if ($response["version"] == 1) {
+					$status = $response_body->status;
+				} else {
+					$status = $response_body->transaction->status;
+				}
 
 				if ("SUCCESS" != $status) {
-					$this->log("ERROR: invalid txnStatus/$status for transaction/$transaction_id for order/$order_id/$order_key");
-					$order->update_status( 'failed', "error updating status from BharatX");
-					$this->add_order_notice("Some error occured while updating status");
+					$this->log("WARN: invalid txnStatus/$status for transaction/$transaction_id for order/$order_id/$order_key");
 					wp_redirect(wc_get_checkout_url());
 					exit();
 				}
@@ -519,9 +451,9 @@ class Bharatx_Pay_In_3_Feature_Gateway extends WC_Payment_Gateway {
 				wp_redirect($this->get_return_url( $order ));
 				exit();
 			} else {
-				$this->log("ERROR: invalid response for get transaction/$transaction_id for order/$order_id/$order_key: $encode_response_body");
-				$order->update_status( 'failed', "error updating status from BharatX");
-				$this->add_order_notice("Some error occured while updating status");
+				$response_body  = $response["data"];
+				$this->log("ERROR: invalid response for get transaction/$transaction_id for order/$order_id/$order_key: $response_body");
+				$this->add_order_notice("Some error occured while updating status: $response_body");
 				wp_redirect(wc_get_checkout_url());
 				exit();
 			}
@@ -563,53 +495,36 @@ class Bharatx_Pay_In_3_Feature_Gateway extends WC_Payment_Gateway {
 			} else {
 				$order = new WC_Order( $order_id );
 			}
+
+			$order_key = $order->get_order_key();
 			$transaction_id = $order->get_transaction_id();
 
-			$uniq_order_id = $this->get_unique_order_id($order->get_id());
-			update_post_meta( $order->get_id(), '_bharatx_order_refund_id', $uniq_order_id );
+			$this->log("INFO: refund request raised for order/$order_id/$order_key for amount/$amount against transaction/$transaction_id");
 
-			$body                    = array(
-				'transactionId'     => $transaction_id,
-			);
-
-			$php_string = json_encode($body);
-			$msg_hash = $php_string . '/api/refund' . $this->merchant_private_key;
-			$shasignature = hash('sha256',$msg_hash,true);
-			$signature = base64_encode($shasignature);
-
-			$args                 = array(
-					'headers'     => array(
-						'Content-Type'  => 'application/json',
-						'X-Partner-Id' => $this->merchant_partner_id,
-						'X-Signature' => $signature,
-					),
-					'body'		  => $php_string
-			);
-			$url                  = $this->get_refund_url();
-			$response             = wp_remote_post( $url, $args );
-			$encode_response_body = wp_remote_retrieve_body( $response );
-			$response_code        = wp_remote_retrieve_response_code( $response );
-			$this->dump_api_actions( $url, $args, $encode_response_body, $response_code );
-			$status  = '';
-			$message = '';
-			$response_body = json_decode( $encode_response_body );
-			if ( 200 == $response_code ) {
-					$status = true;
-					$message = sprintf( __( 'Refund of %1$s successfully sent to BharatX', 'Bharatx_Pay_In_3_Feature_Plugin' ), $amount );
-			} else {
-				$status  = false;
-				$message = sprintf( __( 'There was an error submitting the refund to BharatX.' . $response_body->message, 'Bharatx_Pay_In_3_Feature_Plugin' ) );
+			if ($amount == 0) {
+				return false;
 			}
 
-			if ( true === $status ) {
-				$order->add_order_note( $message );
+			$api_client = new Bharatx_Api_Client($this->merchant_partner_id, $this->merchant_private_key);
+			$response = $api_client->refund_transaction($transaction_id, $amount);
+
+			$status_code = $response["status_code"];
+			$body = $response["data"];
+
+			$this->log("INFO: refund request of amount/$amount for order/$order_id/$order_key against transaction/$transaction_id returned with statusCode/$status_code");
+
+			if ( 200 == $status_code ) {
+				$order->add_order_note("successfully refunded amount $amount against transaction/$transaction_id");
 				return true;
 			} else {
-				$order->add_order_note( $message );
+				$this->log("ERROR: refund request of amount/$amount failed for order/$order_id/$order_key against transaction/$transaction_id: $body");
+				$order->add_order_note("refund request failed: $body");
+
 				return false;
 			}
 		} catch(Exception $e) {
-			print "something went wrong, caught yah! ";
+			$message = $e->getMessage();
+			$this->log("ERROR: some error occured while processing refund: $message");
 		}
 	}
 
