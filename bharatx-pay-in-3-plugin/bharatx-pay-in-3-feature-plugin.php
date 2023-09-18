@@ -16,7 +16,7 @@
  * Plugin Name:       BharatX Pay In 3 
  * Plugin URI:        https://wordpress.org/plugins/bharatx-pay-in-3/
  * Description:       Split orders into 3 interest-free payments
- * Version:           1.6.1
+ * Version:           1.6.2
  * Author:            BharatX
  * Author URI:        https://www.bharatx.tech
  * License:           GPL-2.0+

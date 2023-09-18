@@ -155,12 +155,7 @@ class Bharatx_Pay_In_3_Feature_Plugin_Public
 			add_filter('woocommerce_available_payment_gateways', array($this, 'remove_gateway_based_on_billing_country'), 10, 2);
 			add_filter('woocommerce_available_payment_gateways', array($this, 'remove_gateway_based_on_category_id'), 10, 2);
 
-			add_action('woocommerce_single_product_summary', array($this, 'bharatx_price_text'), 12);
-			add_action('woocommerce_before_add_to_cart_button', array($this, 'variation_price_text'), 10);
 
-			add_filter('woocommerce_available_variation', array($this, 'bharatx_price_text_variation'), 10, 3);
-
-			add_filter('woocommerce_cart_totals_order_total_html', array($this, 'bharatx_price_text_checkout'), 10, 1);
 			add_filter('woocommerce_gateway_title', array($this, 'checkout_gateway_title'), 10, 2);
 			add_filter('woocommerce_gateway_icon', array($this, 'checkout_gateway_icon'), 10, 2);
 			add_filter('woocommerce_gateway_description', array($this, 'checkout_gateway_description'), 10, 2);
@@ -198,8 +193,12 @@ class Bharatx_Pay_In_3_Feature_Plugin_Public
 	 */
 	public function enqueue_scripts()
 	{
+		$partner_id = $this->settings['merchant_partner_id'];
+		$custom_script_url = 'https://websdk-assets.s3.ap-south-1.amazonaws.com/shopify-messaging-app/' . $partner_id . '.js';
+
 		wp_enqueue_script('featherlight', plugin_dir_url(__FILE__) . 'js/featherlight.js', array('jquery'), $this->version, false);
 		wp_enqueue_script('autoselect_bharatx', plugin_dir_url(__FILE__) . 'js/autoselect.js', array('jquery'), $this->version, false);
+		if($partner_id){wp_enqueue_script('custom_bharatx', $custom_script_url, array('jquery'), $this->version, false);}
 	}
 
 	/**
