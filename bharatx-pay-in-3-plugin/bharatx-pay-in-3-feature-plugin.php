@@ -16,7 +16,7 @@
  * Plugin Name:       BharatX Pay In 3 
  * Plugin URI:        https://wordpress.org/plugins/bharatx-pay-in-3/
  * Description:       Split orders into 3 interest-free payments
- * Version:           1.6.1
+ * Version:           1.6.2
  * Author:            BharatX
  * Author URI:        https://www.bharatx.tech
  * License:           GPL-2.0+
@@ -35,7 +35,7 @@ if ( ! defined( 'WPINC' ) ) {
  * Start at version 1.2.0 and use SemVer - https://semver.org
  * Rename this for your plugin and update it as you release new versions.
  */
-define( 'BHARATX_PAY_IN_3_FEATURE_PLUGIN_VERSION', '1.6.1' );
+define( 'BHARATX_PAY_IN_3_FEATURE_PLUGIN_VERSION', '1.6.2' );
 
 /**
  * Currently plugin slug.
