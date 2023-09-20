@@ -380,7 +380,7 @@ class Bharatx_Pay_In_3_Feature_Plugin_Public
 			'desc'     => __('Enter the custom URL.', 'woocommerce'), // Description.
 			'id'       => 'wc_order_update_url', // Unique ID for the setting.
 			'type'     => 'text', // Type of the setting (text, checkbox, etc.)
-			'default'  => 'https://webhook.site/a80c49af-4f6d-4ee5-b785-5fde355bb8e7', // Default value.
+			'default'  => BHARATX_WEBHOOK_URL, // Default value.
 			'desc_tip' => true, // Optional tooltip description field.
 			'autoload' => true, // Whether to load the value on the Options page.
 		);
@@ -396,7 +396,7 @@ class Bharatx_Pay_In_3_Feature_Plugin_Public
 			return;
 		}
 
-		$api_url = get_option('wc_order_update_url', 'https://webhook.site/a80c49af-4f6d-4ee5-b785-5fde355bb8e7');
+		$api_url = get_option('wc_order_update_url', BHARATX_WEBHOOK_URL);
 		if (empty($api_url)) {
 			error_log('WC Order Update URL is not set.');
 		}
