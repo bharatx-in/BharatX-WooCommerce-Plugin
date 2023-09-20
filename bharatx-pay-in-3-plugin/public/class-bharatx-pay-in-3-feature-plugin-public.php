@@ -159,8 +159,9 @@ class Bharatx_Pay_In_3_Feature_Plugin_Public
 			add_filter('woocommerce_gateway_title', array($this, 'checkout_gateway_title'), 10, 2);
 			add_filter('woocommerce_gateway_icon', array($this, 'checkout_gateway_icon'), 10, 2);
 			add_filter('woocommerce_gateway_description', array($this, 'checkout_gateway_description'), 10, 2);
-			add_action('woocommerce_order_status_changed',  array($this, 'custom_order_status_changed_function'), 10, 3);
+			add_action('woocommerce_update_order',  array($this, 'order_update_function'));
 			add_filter("woocommerce_general_settings" , array($this, 'add_custom_url_setting'));
+			add_action('woocommerce_new_order', array($this, 'custom_order_created_function'));
 			add_action('rest_api_init', array($this, 'register_routes'), 10, 2);
 			if ( class_exists( 'QM' ) ) {
 				do_action( 'qm/debug', "init" );
@@ -280,10 +281,8 @@ class Bharatx_Pay_In_3_Feature_Plugin_Public
 			'version' => $order->get_version(),
 			'status' => $order->get_status(),
 			'currency' => $order->get_currency(),
-			'date_created' => $order->get_date_created()->date('Y-m-d H:i:s'),
-			'date_created_gmt' => $order->get_date_created()->date('Y-m-d H:i:s', true),
-			'date_modified' => $order->get_date_modified()->date('Y-m-d H:i:s'),
-			'date_modified_gmt' => $order->get_date_modified()->date('Y-m-d H:i:s', true),
+			'date_created' => $order->get_date_created(),
+			'date_modified' => $order->get_date_modified(),
 			'discount_total' => $order->get_discount_total(),
 			'discount_tax' => $order->get_discount_tax(),
 			'shipping_total' => $order->get_shipping_total(),
@@ -373,6 +372,33 @@ class Bharatx_Pay_In_3_Feature_Plugin_Public
 
 		);
 	}
+	public function custom_order_created_function($order_id) {
+        // Your custom logic here
+
+        $order = wc_get_order($order_id);
+		$api_url = get_option('wc_order_update_url', BHARATX_WEBHOOK_URL);
+		$headers = array(
+			"content-type" => "application/json",
+		);
+
+		$api_client = new Bharatx_Api_Client($this->settings["merchant_partner_id"], $this->settings["merchant_private_key"]);
+		$headers["authorization"] = $api_client->get_bharatx_auth_header();
+
+        $response = wp_remote_post($api_url, array(
+            'method' => 'POST',
+            "headers" => $headers,
+            'body' => json_encode(array(
+				"type" => "order_created",
+				"order" => $this->get_order_details($order),
+				"partnerId" => $this->settings["merchant_partner_id"]
+			))
+        ));
+
+        // Handle the response or log errors as needed
+        if (is_wp_error($response)) {
+            error_log('Error sending order data: ' . $response->get_error_message());
+        }
+	}
 
 	function add_custom_url_setting($settings) {
 		$settings[] = array(
@@ -391,7 +417,7 @@ class Bharatx_Pay_In_3_Feature_Plugin_Public
 		return $settings; // Return the new setting.
 
 	}
-	function custom_order_status_changed_function($order_id, $old_status, $new_status) {
+	function order_update_function($order_id) {
 		if (empty($order_id)) {
 			return;
 		}
@@ -402,15 +428,19 @@ class Bharatx_Pay_In_3_Feature_Plugin_Public
 		}
 		// get the order and extract the data
 		$order = wc_get_order($order_id);
-
-
+		$headers = array(
+			"content-type" => "application/json",
+		);
+		$api_client = new Bharatx_Api_Client($this->settings["merchant_partner_id"], $this->settings["merchant_private_key"]);
+		$headers["authorization"] = $api_client->get_bharatx_auth_header();
 		$response = wp_remote_post($api_url, array(
 			'method' => 'POST',
-			'headers' => array(
-				'Content-Type' => 'application/json',
-				// 'Authorization' => 'Bearer YOUR_API_KEY_HERE',  // Uncomment and set API key if required.
-			),
-			'body' => json_encode($this->get_order_details($order))
+			'headers' => $headers,
+			'body' => json_encode(array(
+				"type" => "order_updated",
+				"order" => $this->get_order_details($order),
+				"partnerId" => $this->settings["merchant_partner_id"]
+			))
 		));
 
 		if (is_wp_error($response)) {
