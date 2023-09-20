@@ -159,7 +159,50 @@ class Bharatx_Pay_In_3_Feature_Plugin_Public
 			add_filter('woocommerce_gateway_title', array($this, 'checkout_gateway_title'), 10, 2);
 			add_filter('woocommerce_gateway_icon', array($this, 'checkout_gateway_icon'), 10, 2);
 			add_filter('woocommerce_gateway_description', array($this, 'checkout_gateway_description'), 10, 2);
+			add_action('woocommerce_order_status_changed',  array($this, 'custom_order_status_changed_function'), 10, 3);
+			add_filter("woocommerce_general_settings" , array($this, 'add_custom_url_setting'));
+			add_action('rest_api_init', array($this, 'register_routes'), 10, 2);
+			if ( class_exists( 'QM' ) ) {
+				do_action( 'qm/debug', "init" );
+			}
 		}
+	}
+	public function register_routes() {
+		if ( class_exists( 'QM' ) ) {
+			do_action( 'qm/debug', "route" );
+		}
+		$namespace = 'v1';
+		$base = 'route';
+		register_rest_route( $namespace, '/' . $base . '/orders', array(
+		  array(
+			'methods'             => "GET",
+			'callback'            => array( $this, 'get_orders' ),
+			'permission_callback' => array( $this, 'get_orders_permissions_check' ),
+			'args'                => array(
+				'last_order_id' => array(
+					'default' => 0,
+					'validate_callback' => function($param, $request, $key) {
+						return is_numeric($param);
+					}
+				),
+			)
+		  ),
+		) );
+		// i will send the last card id as args
+		// register_rest_route( $namespace, '/' . $base . '/abandoned-carts', array(
+		// 	array(
+		// 	  'methods'             => "GET",
+		// 	  'callback'            => array( $this, 'get_abandoned_carts' ),
+		// 	  'permission_callback' => array( $this, 'get_abandoned_carts_permissions_check' ),
+		// 	  'args'                => array(
+		// 		'last_cart_id' => array(
+		// 			'default' => 0,
+		// 			'validate_callback' => function($param, $request, $key) {
+		// 				return is_numeric($param);
+		// 			}
+		// 		),
+		// 	)),
+		//   ));
 	}
 
 	/**
@@ -226,6 +269,211 @@ class Bharatx_Pay_In_3_Feature_Plugin_Public
 		}
 		return $available_gateways;
 	}
+
+	function get_order_details ($order){ 
+		return array(
+			'id' => $order->get_id(),
+			'parent_id' => $order->get_parent_id(),
+			'number' => $order->get_order_number(),
+			'order_key' => $order->get_order_key(),
+			'created_via' => $order->get_created_via(),
+			'version' => $order->get_version(),
+			'status' => $order->get_status(),
+			'currency' => $order->get_currency(),
+			'date_created' => $order->get_date_created()->date('Y-m-d H:i:s'),
+			'date_created_gmt' => $order->get_date_created()->date('Y-m-d H:i:s', true),
+			'date_modified' => $order->get_date_modified()->date('Y-m-d H:i:s'),
+			'date_modified_gmt' => $order->get_date_modified()->date('Y-m-d H:i:s', true),
+			'discount_total' => $order->get_discount_total(),
+			'discount_tax' => $order->get_discount_tax(),
+			'shipping_total' => $order->get_shipping_total(),
+			'shipping_tax' => $order->get_shipping_tax(),
+			'cart_tax' => $order->get_cart_tax(),
+			'total' => $order->get_total(),
+			'total_tax' => $order->get_total_tax(),
+			'prices_include_tax' => $order->get_prices_include_tax(),
+			'customer_id' => $order->get_customer_id(),
+			'customer_ip_address' => $order->get_customer_ip_address(),
+			'customer_user_agent' => $order->get_customer_user_agent(),
+			'customer_note' => $order->get_customer_note(),
+			'billing' => $order->get_address('billing'),
+			'shipping' => $order->get_address('shipping'),
+			'payment_method' => $order->get_payment_method(),
+			'payment_method_title' => $order->get_payment_method_title(),
+			'transaction_id' => $order->get_transaction_id(),
+			'date_paid' => $order->get_date_paid() ? $order->get_date_paid()->date('Y-m-d H:i:s') : null,
+			'date_paid_gmt' => $order->get_date_paid() ? $order->get_date_paid()->date('Y-m-d H:i:s', true) : null,
+			'date_completed' => $order->get_date_completed() ? $order->get_date_completed()->date('Y-m-d H:i:s') : null,
+			'date_completed_gmt' => $order->get_date_completed() ? $order->get_date_completed()->date('Y-m-d H:i:s', true) : null,
+			'cart_hash' => $order->get_cart_hash(),
+			'meta_data' => $order->get_meta_data(),
+			'line_items' => array_map(function($item) {
+				return [
+					'id' => $item->get_id(),
+					'name' => $item->get_name(),
+					'product_id' => $item->get_product_id(),
+					'variation_id' => $item->get_variation_id(),
+					'quantity' => $item->get_quantity(),
+					'tax_class' => $item->get_tax_class(),
+					'subtotal' => $item->get_subtotal(),
+					'subtotal_tax' => $item->get_subtotal_tax(),
+					'total' => $item->get_total(),
+					'total_tax' => $item->get_total_tax(),
+					'taxes' => $item->get_taxes(),
+					'meta_data' => $item->get_meta_data(),
+					'sku' => $item->get_product()->get_sku(),
+					'price' => $item->get_total() / $item->get_quantity()
+				];
+			}, $order->get_items()),
+			'tax_lines' => array_map(function($item) {
+				return [
+					'id' => $item->get_id(),
+					'rate_code' => $item->get_rate_code(),
+					'rate_id' => $item->get_rate_id(),
+					'label' => $item->get_label(),
+					'compound' => $item->is_compound(),
+					'tax_total' => $item->get_tax_total(),
+					'shipping_tax_total' => $item->get_shipping_tax_total(),
+					'meta_data' => $item->get_meta_data()
+				];
+			}, $order->get_items('tax')),
+			'shipping_lines' => array_map(function($item) {
+				return [
+					'id' => $item->get_id(),
+					'method_title' => $item->get_method_title(),
+					'method_id' => $item->get_method_id(),
+					'total' => $item->get_total(),
+					'total_tax' => $item->get_total_tax(),
+					'taxes' => $item->get_taxes(),
+					'meta_data' => $item->get_meta_data()
+				];
+			}, $order->get_items('shipping')),
+			'fee_lines' => array_map(function($item) {
+				return [
+					'id' => $item->get_id(),
+					'name' => $item->get_name(),
+					'tax_class' => $item->get_tax_class(),
+					'tax_status' => $item->get_tax_status(),
+					'total' => $item->get_total(),
+					'total_tax' => $item->get_total_tax(),
+					'taxes' => $item->get_taxes(),
+					'meta_data' => $item->get_meta_data()
+				];
+			}, $order->get_items('fee')),
+		
+			'coupon_lines' => array_map(function($item) {
+				return [
+					'id' => $item->get_id(),
+					'code' => $item->get_code(),
+					'discount' => $item->get_discount(),
+					'discount_tax' => $item->get_discount_tax(),
+					'meta_data' => $item->get_meta_data()
+				];
+			}, $order->get_items('coupon')),		
+
+		);
+	}
+
+	function add_custom_url_setting($settings) {
+		$settings[] = array(
+			'title'    => __('Custom URL', 'woocommerce'), // Title of the field.
+			'desc'     => __('Enter the custom URL.', 'woocommerce'), // Description.
+			'id'       => 'wc_order_update_url', // Unique ID for the setting.
+			'type'     => 'text', // Type of the setting (text, checkbox, etc.)
+			'default'  => 'https://webhook.site/a80c49af-4f6d-4ee5-b785-5fde355bb8e7', // Default value.
+			'desc_tip' => true, // Optional tooltip description field.
+			'autoload' => true, // Whether to load the value on the Options page.
+		);
+		if ( class_exists( 'QM' ) ) {
+			do_action( 'qm/debug', $settings);
+		}
+
+		return $settings; // Return the new setting.
+
+	}
+	function custom_order_status_changed_function($order_id, $old_status, $new_status) {
+		if (empty($order_id)) {
+			return;
+		}
+
+		$api_url = get_option('wc_order_update_url', 'https://webhook.site/a80c49af-4f6d-4ee5-b785-5fde355bb8e7');
+		if (empty($api_url)) {
+			error_log('WC Order Update URL is not set.');
+		}
+		// get the order and extract the data
+		$order = wc_get_order($order_id);
+
+
+		$response = wp_remote_post($api_url, array(
+			'method' => 'POST',
+			'headers' => array(
+				'Content-Type' => 'application/json',
+				// 'Authorization' => 'Bearer YOUR_API_KEY_HERE',  // Uncomment and set API key if required.
+			),
+			'body' => json_encode($this->get_order_details($order))
+		));
+
+		if (is_wp_error($response)) {
+			$error_message = $response->get_error_message();
+			error_log("Error sending order update for Order ID {$order_id}: {$error_message}");
+		} else {
+		}
+	}
+
+	public function get_orders_permissions_check( $request ) {
+		$received_key = $request->get_header('x-admin-key');
+		$stored_key = 'test';  // Replace with your actual admin key
+	
+		if ( $received_key === $stored_key ) {
+			return true;
+		}
+		
+		return false;
+	}
+	
+	function get_orders($request) {
+
+		global $wpdb;
+	
+		$last_order_id = (int) $request->get_param('last_order_id');
+	
+		// Get post IDs greater than $last_cart_id
+		$query = "
+			SELECT ID FROM $wpdb->posts 
+			WHERE post_type = 'shop_order' 
+			AND (post_status = 'wc-completed' OR post_status = 'wc-processing' OR post_status = 'wc-pending' )
+			AND ID > %d
+		";
+		$post_ids = $wpdb->get_col($wpdb->prepare($query, $last_order_id));
+	
+		// // If no matching post IDs, return an empty array
+		if (empty($post_ids)) {
+			return array();
+		}
+
+		$args = array(
+			'post_type' => 'shop_order',
+			'post_status' => array('wc-completed', 'wc-processing', 'wc-pending'),
+			'post__in' => $post_ids,
+			'orderby' => 'ID',
+			'order' => 'ASC'
+		);
+
+		$orders = get_posts($args);
+		
+		$order_data = $this->extract_order_data($orders);
+		return $order_data;
+	}
+	private function extract_order_data($orders) {
+		$order_data = [];
+	
+		foreach ($orders as $order_post) {
+			$order = wc_get_order($order_post);
+			$order_data[] = $this->get_order_details($order);
+		}
+		return $order_data;
+	}	
+
 
 	public function remove_gateway_based_on_billing_total($available_gateways)
 	{
