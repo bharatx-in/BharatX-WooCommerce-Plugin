@@ -312,7 +312,7 @@ class Bharatx_Pay_In_3_Feature_Gateway extends WC_Payment_Gateway {
 		if ( 200 == $response_code ) {
 			$response_body = $response["data"];
 
-			$order->add_order_note( esc_html__( 'Transaction Id: ' . $transaction_id , 'Bharatx_Pay_In_3_Feature_Plugin' ) );
+			$order->add_order_note( esc_html__( 'BharatX: Transaction Id: ' . $transaction_id , 'Bharatx_Pay_In_3_Feature_Plugin' , 'Order Amount: ' . $amount , 'Bharatx_Pay_In_3_Feature_Plugin') );
 
 			Bharatx_Pay_In_3_Feature_Plugin::set_bharatx_transaction_id_for_order($order_key, $transaction_id);
 			$this -> log("INFO: associated transaction/$transaction_id with order/$order_id/$order_key");
@@ -332,7 +332,7 @@ class Bharatx_Pay_In_3_Feature_Gateway extends WC_Payment_Gateway {
 			$data = $response["data"];
 			$this -> log("ERROR: error occured while creating BharatX transaction for order/$order_id/$order_key: $data");
 
-			$order->add_order_note( esc_html__( 'Unable to generate the transaction ID. Payment couldn\'t proceed.', 'bharatx-pay-in-3-feature-plugin' ) );
+			$order->add_order_note( esc_html__( 'BharatX: Unable to generate the transaction ID. Payment couldn\'t proceed.', 'bharatx-pay-in-3-feature-plugin' ) );
 			wc_add_notice( esc_html__( 'Sorry, there was a problem with your payment.', 'bharatx-pay-in-3-feature-plugin' ), 'error' );
 
 			return array(
@@ -444,7 +444,7 @@ class Bharatx_Pay_In_3_Feature_Gateway extends WC_Payment_Gateway {
 
 				$this->log("INFO: successful transaction/$transaction_id for order/$order_id/$order_key");
 
-				$order->add_order_note( esc_html__( 'Payment successfully processed via BharatX Pay in 3' , 'Bharatx_Pay_In_3_Feature_Plugin' ) );
+				$order->add_order_note( esc_html__( 'BharatX: Payment successfully processed via BharatX Pay in 3' , 'Bharatx_Pay_In_3_Feature_Plugin' ) );
 				$order->payment_complete( $transaction_id);
 				WC()->cart->empty_cart();
 				
@@ -514,11 +514,11 @@ class Bharatx_Pay_In_3_Feature_Gateway extends WC_Payment_Gateway {
 			$this->log("INFO: refund request of amount/$amount for order/$order_id/$order_key against transaction/$transaction_id returned with statusCode/$status_code");
 
 			if ( 200 == $status_code ) {
-				$order->add_order_note("successfully refunded amount $amount against transaction/$transaction_id");
+				$order->add_order_note("BharatX: successfully refunded amount $amount against transaction/$transaction_id");
 				return true;
 			} else {
 				$this->log("ERROR: refund request of amount/$amount failed for order/$order_id/$order_key against transaction/$transaction_id: $body");
-				$order->add_order_note("refund request failed: $body");
+				$order->add_order_note("BharatX: refund request failed: $body");
 
 				return false;
 			}
