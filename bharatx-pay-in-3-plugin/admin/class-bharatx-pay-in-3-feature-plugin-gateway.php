@@ -276,6 +276,8 @@ class Bharatx_Pay_In_3_Feature_Gateway extends WC_Payment_Gateway {
 				'city'    => $order->get_billing_city(),
 				'pincode' => $order->get_billing_postcode(),
 			),
+			'amount_from_calculate_totals' => $order->calculate_totals(),
+			'amount_from_get_total' => $order->get_total(),
 			'items'				 => $items,
 			'orderKey'		     => $order->get_order_key(),
 			'webhook_url'	     => get_site_url() . '/?wc-api=Bharatx_Pay_In_3_Feature_Gateway_Webhook&key=' . $order->get_order_key(),
@@ -283,7 +285,7 @@ class Bharatx_Pay_In_3_Feature_Gateway extends WC_Payment_Gateway {
 			'thank_you_page' => $this->get_return_url($order),
 		);
 
-		$amount = $order->calculate_totals();
+		$amount = $order->get_total();
 		$webhookUrl = get_site_url() . '/?wc-api=Bharatx_Pay_In_3_Feature_Gateway_Webhook&key=' . $order->get_order_key();
 		$redirectUrl = get_site_url() . '/?wc-api=Bharatx_Pay_In_3_Feature_Gateway&key=' . $order->get_order_key();
 		$logoOverride = $this->icon; 
