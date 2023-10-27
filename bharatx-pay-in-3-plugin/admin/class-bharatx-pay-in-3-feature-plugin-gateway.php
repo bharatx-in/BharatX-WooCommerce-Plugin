@@ -276,7 +276,6 @@ class Bharatx_Pay_In_3_Feature_Gateway extends WC_Payment_Gateway {
 				'city'    => $order->get_billing_city(),
 				'pincode' => $order->get_billing_postcode(),
 			),
-			'amount_from_calculate_totals' => $order->calculate_totals(),
 			'amount_from_get_total' => $order->get_total(),
 			'items'				 => $items,
 			'orderKey'		     => $order->get_order_key(),
@@ -314,7 +313,7 @@ class Bharatx_Pay_In_3_Feature_Gateway extends WC_Payment_Gateway {
 		if ( 200 == $response_code ) {
 			$response_body = $response["data"];
 
-			$order->add_order_note( esc_html__( 'BharatX: Transaction Id: ' . $transaction_id , 'Bharatx_Pay_In_3_Feature_Plugin' ) . ' ' . esc_html__( 'Order Amount: ' . $amount , 'Bharatx_Pay_In_3_Feature_Plugin') );
+			$order->add_order_note( esc_html__( 'BharatX: Transaction Id: ' . $transaction_id , 'Bharatx_Pay_In_3_Feature_Plugin' ) . ' ' . esc_html__( ': Order Amount: ' . $amount , 'Bharatx_Pay_In_3_Feature_Plugin') );
 
 			Bharatx_Pay_In_3_Feature_Plugin::set_bharatx_transaction_id_for_order($order_key, $transaction_id);
 			$this -> log("INFO: associated transaction/$transaction_id with order/$order_id/$order_key");
@@ -431,6 +430,10 @@ class Bharatx_Pay_In_3_Feature_Gateway extends WC_Payment_Gateway {
 
 			if (200 == $response_code) {
 				$response_body  = $response["data"];
+				$downpayment = $response_body->transaction->emis[0]->amount/100;
+				$amount = $response_body->transaction->amount/100;
+				//length of emis is tenure
+				$tenure = count($response_body->transaction->emis)-1;
 				$status = null;
 				if ($response["version"] == 1) {
 					$status = $response_body->status;
@@ -446,7 +449,7 @@ class Bharatx_Pay_In_3_Feature_Gateway extends WC_Payment_Gateway {
 
 				$this->log("INFO: successful transaction/$transaction_id for order/$order_id/$order_key");
 
-				$order->add_order_note( esc_html__( 'BharatX: Payment successfully processed via BharatX Pay in 3' , 'Bharatx_Pay_In_3_Feature_Plugin' ) );
+				$order->add_order_note( esc_html__( 'BharatX: Payment successfully processed via BharatX Pay in 3 ' , 'Bharatx_Pay_In_3_Feature_Plugin' ) . '<br>' . esc_html__( 'Order Amount: Rs.' . $amount , 'Bharatx_Pay_In_3_Feature_Plugin') . '<br>' . esc_html__( 'Downpayment: Rs.' . $downpayment , 'Bharatx_Pay_In_3_Feature_Plugin') . '<br>' . esc_html__( 'Tenure: ' . $tenure . 'months' , 'Bharatx_Pay_In_3_Feature_Plugin') );
 				$order->payment_complete( $transaction_id);
 				WC()->cart->empty_cart();
 				
