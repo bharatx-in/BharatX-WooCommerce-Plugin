@@ -314,7 +314,7 @@ class Bharatx_Pay_In_3_Feature_Gateway extends WC_Payment_Gateway {
 		if ( 200 == $response_code ) {
 			$response_body = $response["data"];
 
-			$order->add_order_note( esc_html__( 'BharatX: Transaction Id: ' . $transaction_id , 'Bharatx_Pay_In_3_Feature_Plugin' , 'Order Amount: ' . $amount , 'Bharatx_Pay_In_3_Feature_Plugin') );
+			$order->add_order_note( esc_html__( 'BharatX: Transaction Id: ' . $transaction_id , 'Bharatx_Pay_In_3_Feature_Plugin' ) . ' ' . esc_html__( 'Order Amount: ' . $amount , 'Bharatx_Pay_In_3_Feature_Plugin') );
 
 			Bharatx_Pay_In_3_Feature_Plugin::set_bharatx_transaction_id_for_order($order_key, $transaction_id);
 			$this -> log("INFO: associated transaction/$transaction_id with order/$order_id/$order_key");
