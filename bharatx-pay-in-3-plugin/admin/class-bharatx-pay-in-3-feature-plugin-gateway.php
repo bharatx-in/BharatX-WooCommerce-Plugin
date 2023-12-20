@@ -405,7 +405,7 @@ class Bharatx_Pay_In_3_Feature_Gateway extends WC_Payment_Gateway {
 			if ($current_order_status != "pending" && $current_order_status != "failed") {
 				$this->log("WARN: invalid orderStatus/$current_order_status for order/$order_id/$order_key");
 
-				wp_redirect($this->get_return_url($order));
+				wp_redirect(get_site_url());
 				exit();
 			}
 
