@@ -57,6 +57,8 @@ define( 'BHARATX_PAY_IN_3_FEATURE_PLUGIN_BASENAME', plugin_basename( BHARATX_PAY
  */
 define( 'BHARATX_PAY_IN_3_FEATURE_PLUGIN_DIR', untrailingslashit( plugin_dir_path( __FILE__ ) ) );
 
+define('BHARATX_WEBHOOK_URL', "https://web-v2.bharatx.tech/api/webhooks/woocom/orders");
+
 /**
  * The code that runs during plugin activation.
  * This action is documented in includes/class-bharatx pay in 3 feature plugin-activator.php
