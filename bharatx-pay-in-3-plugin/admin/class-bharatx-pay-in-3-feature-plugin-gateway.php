@@ -281,9 +281,11 @@ class Bharatx_Pay_In_3_Feature_Gateway extends WC_Payment_Gateway {
 			'webhook_url'	     => get_site_url() . '/?wc-api=Bharatx_Pay_In_3_Feature_Gateway_Webhook&key=' . $order->get_order_key(),
 			'orderId' 			 => $order_id,
 			'thank_you_page' => $this->get_return_url($order),
+			'mwb_pcfw_order_remaining_price' => $order->get_meta('mwb_pcfw_order_remaining_price'),
+			'order'     => $order->get_data(),
 		);
 
-		$amount = $order->calculate_totals();
+		$amount = $order->get_meta('mwb_pcfw_order_remaining_price') ? $order->get_meta('mwb_pcfw_order_remaining_price') : $order->calculate_totals();
 		$webhookUrl = get_site_url() . '/?wc-api=Bharatx_Pay_In_3_Feature_Gateway_Webhook&key=' . $order->get_order_key();
 		$redirectUrl = get_site_url() . '/?wc-api=Bharatx_Pay_In_3_Feature_Gateway&key=' . $order->get_order_key();
 		$logoOverride = $this->icon; 
