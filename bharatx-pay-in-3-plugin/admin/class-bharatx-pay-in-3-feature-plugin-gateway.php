@@ -437,7 +437,7 @@ class Bharatx_Pay_In_3_Feature_Gateway extends WC_Payment_Gateway {
 					$status = $response_body->status;
 				} else {
 					$status = $response_body->transaction->status;
-					$paymentAmount = $response_body->transaction->amount;
+					$paymentAmount = $response_body->transaction->amount/100;
 				}
 
 				if ("SUCCESS" != $status) {
@@ -452,6 +452,8 @@ class Bharatx_Pay_In_3_Feature_Gateway extends WC_Payment_Gateway {
 				if ($order->get_meta('mwb_pcfw_order_remaining_price')) {
 					$remaining_amount = $order->get_meta('mwb_pcfw_order_remaining_price');
 					$order->add_order_note( esc_html__( "Partial payment request of $remaining_amount received, collected amount $paymentAmount via BharatX Pay in 3 " , 'Bharatx_Pay_In_3_Feature_Plugin' ) );
+				}else{
+					$order->add_order_note( esc_html__( "payment request of $paymentAmount received, collected amount $paymentAmount via BharatX Pay in 3" , 'Bharatx_Pay_In_3_Feature_Plugin' ) );
 				}
 				$order->payment_complete( $transaction_id);
 				WC()->cart->empty_cart();
